@@ -1,0 +1,123 @@
+\documentclass[a4paper,11pt]{report}
+
+\usepackage{parskip}
+\usepackage[margin=2.54cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[table,xcdraw]{xcolor} 
+\usepackage{pdfpages}  %to insert pdf documents
+\usepackage[draft]{todonotes}
+\usepackage{pdflscape}
+\usepackage{teresa}  % this is the project-layout style
+
+%Joao Imports
+\usepackage{amsfonts}
+\usepackage{framed,color}
+\definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+\usepackage[hidelinks]{hyperref}
+\usepackage[hyphenbreaks]{breakurl}
+\usepackage{multirow}
+\usepackage{subcaption}
+
+\renewcommand{\rmdefault}{phv} % Arial
+\renewcommand{\sfdefault}{phv} % Arial
+ \usepackage[T1]{fontenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+
+\graphicspath{{./}{figures/}}
+%\theoremstyle{remark}
+\newtheorem{req}{Requirement}
+%\newcommand{\citn}{\begin{footnotesize}[cit. needed]\end{footnotesize}}
+%\newcommand{\sw}[1]{\textcolor{red}{SW: #1}}
+%\newcommand{\jtodo}[1]{\todo[inline]{TODO (Joao): #1}}
+\newcommand{\halfrule}{\begin{center}{\rule{0.5\textwidth}{.4pt}}\end{center}}
+\newenvironment{draftpts}
+{\noindent\ignorespaces\begin{shaded}\begin{center}\footnotesize{DRAFT | Topics to include:}\end{center}\begin{small}}
+{\end{small}\end{shaded}\par\noindent\ignorespacesafterend}
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+%% Adapt the version and code to your deliverable.
+%% Those values will appear in the header
+\delivcode{D5.3}
+\title{Feedback Part 2\\ Integrated Feedback System}
+%% Running title
+\titlefoot{Feedback Part 2 -- Integrated Feedback System}
+
+\duedate{M30 -  May  31, 2016}
+\wpleader{UvA}
+\security{Public} %Public or private
+\status{Submitted} %Submitted
+\delivversion{1.0}
+
+
+
+\begin{document}
+
+\maketitle
+\makeheader
+
+
+%%Add a new row with the current version info. 
+\begin{documentinfo}
+
+\begin{tabular}{|p{5cm}|p{4cm}|p{5cm}|}
+        \hline
+        \rowcolor{gray!50}
+        Date and Version Number & Author & Comments\\ \hline
+        22.07.2015 v0.1 & Jo\~ao Messias & Initial Verson.\\
+\end{tabular}
+
+\end{documentinfo}
+
+
+\pagebreak
+\pagebreak
+
+\tableofcontents
+
+\pagebreak
+
+\listoffigures
+
+\pagebreak
+
+\listoftables
+
+\pagebreak
+
+%\begin{abstract}
+
+%\end{abstract}
+
+
+\section{Executive Summary}\label{sec:sum}
+
+This Deliverable describes the work that was carried out in the context of Tasks 5.1 and 5.2 of the TERESA project.
+
+\section{Contributors}\label{sec:cont}
+
+UvA, and UPO as reviewers
+
+\newpage
+
+\section{Introduction}\label{sec:intro}
+\label{sec:intro}
+
+\section{IRLF}
+\label{sec:irlf}
+
+\section{RRT-Learning}
+\label{sec:rrts}
+
+\section{Richard's Work}
+
+\section{Conclusions and Future Work in Tasks 5.1 and 5.2}
+\label{sec:conclusions}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

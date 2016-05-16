@@ -1,0 +1,265 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{teresa}[2014/07/10 LaTeX-Layout for TERESA Project]
+
+\RequirePackage{fancyhdr}
+\RequirePackage{graphicx}
+\RequirePackage{lastpage}
+
+
+
+% ------------------- author-command's definition -------------------
+
+\newcommand{\@delivversion}{}
+\newcommand{\delivversion}[1]{\gdef\@delivversion{#1}}
+\newcommand{\@delivcode}{}
+\newcommand{\delivcode}[1]{\gdef\@delivcode{#1}}
+\newcommand{\@titlefoot}{}
+\newcommand{\titlefoot}[1]{\gdef\@titlefoot{#1}}
+\newcommand{\@partner}{}
+\newcommand{\partner}[1]{\gdef\@partner{#1}}
+\newcommand{\@security}{}
+\newcommand{\security}[1]{\gdef\@security{#1}}
+\newcommand{\@duedate}{}
+\newcommand{\duedate}[1]{\gdef\@duedate{#1}}
+\newcommand{\@wpnumber}{}
+\newcommand{\wpnumber}[1]{\gdef\@wpnumber{#1}}
+\newcommand{\@wptitle}{}
+\newcommand{\wptitle}[1]{\gdef\@wptitle{#1}}
+\newcommand{\@wpleader}{}
+\newcommand{\wpleader}[1]{\gdef\@wpleader{#1}}
+\newcommand{\@keywords}{}
+\newcommand{\keywords}[1]{\gdef\@keywords{#1}}
+\newcommand{\@personsmonth}{}
+\newcommand{\personsmonth}[1]{\gdef\@personsmonth{#1}}
+\newcommand{\@reviewers}{}
+\newcommand{\reviewers}[1]{\gdef\@reviewers{#1}}
+\newcommand{\status}[1]{\gdef\@status{#1}}
+
+% ------------------------ head and foot ---------------------------
+
+\newcommand{\makeheader}
+{
+\pagestyle{fancy}
+
+
+\lhead[]{\footnotesize{TERESA - 611153}}
+
+\chead[]{}
+
+
+\rhead[]{}
+
+
+\lfoot[\small{\@titlefoot}]
+{\footnotesize{\@titlefoot}}
+
+\cfoot[] {}
+
+%\rfoot[\small{\@titlefoot}] {\small{\@titlefoot}}
+\rfoot[\thepage]{\footnotesize{Page \thepage\ of \pageref{LastPage}}}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+}
+
+% ------------------------- description ------------------------------
+
+\newcommand{\makedescription}
+{
+
+\begin{center}
+
+\vskip 1em%
+
+\begin{tabular}{|p{5.5cm}|p{5cm}|}
+        \hline
+        \textbf{Due date}: & \@duedate \\ \hline
+        \textbf{Delivery}: & \@date \\ \hline
+	\textbf{Lead partner}: &	\@wpleader \\ \hline
+        \textbf{Dissemination level}: & \@security \\ \hline
+        \textbf{Status}: &  \@status \\ \hline
+        \textbf{Version}: & \@delivversion \\ \hline
+\end{tabular}
+
+\end{center}
+}
+
+
+% ------------------------- versions ------------------------------
+
+
+\newenvironment{documentinfo}[1][\unskip]{%
+
+\thispagestyle{empty}
+
+\textbf{DOCUMENT INFO}
+
+%\par
+\noindent
+#1
+\noindent}
+{}
+
+% ----------------------- general parameters ----------------------------
+
+
+%\color{blue}
+
+%\textheight=22.0cm
+%\headheight=2.2cm
+%\topmargin=0.0in
+%\headsep=0.5cm
+%\textwidth=15.0cm
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\if@titlepage
+  \renewcommand\maketitle{\begin{titlepage}%
+  \headheight=0.0in
+  \topmargin=0.0in
+  \headsep=0.0in
+  \begin{center} 
+ 
+  \begin{tabular}{p{2cm}p{8cm}p{2cm}}
+     
+        
+  \includegraphics[width=2cm]{flag_yellow_low}  & \begin{center}TERESA - 611153 - FP7/2013-2016 \end{center}&     \includegraphics[width=2cm]{fp7logo}
+         
+\end{tabular}
+\end{center}
+\vskip 3em%
+   %\vspace{1em}%
+  %\textheight=26.0cm
+  \begin{center}
+  \includegraphics[width=10cm]{TERESA-logo_RGB}%
+  \end{center}
+  \let\footnotesize\small
+  \let\footnoterule\relax
+  \let \footnote \thanks
+  \vskip 3em%
+  \begin{center}%
+  
+  \noindent \fbox{%
+    \parbox{\textwidth}{  \begin{center} \LARGE Deliverable \@delivcode: \@title  \end{center}}
+  }
+  
+%    {\LARGE Deliverable \@delivcode: \@title \par}%
+    \vskip 4em%
+ %
+ {\large  Project Acronym: \emph{TERESA}}\\
+ \vskip 0.4em%
+{\large Project Full Title: Telepresence Reinforcement-Learning Social Agent}\\
+  \vskip 0.4em%
+  \large{Grant Agreement no. \textbf{611153}} \\
+  \end{center}%\par
+  
+    \vspace{1em}%
+
+  \makedescription
+
+  
+  \end{titlepage}%
+  \setcounter{footnote}{0}%
+  \global\let\thanks\relax
+  \global\let\maketitle\relax
+  \global\let\@thanks\@empty
+  %\global\let\@author\@empty
+  %\global\let\@date\@empty
+  %\global\let\@title\@empty
+  \global\let\title\relax
+  \global\let\author\relax
+  \global\let\date\relax
+  \global\let\and\relax
+}
+\else
+\renewcommand\maketitle{\par
+  \begingroup
+    \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
+    \def\@makefnmark{\rlap{\@textsuperscript{\normalfont\@thefnmark}}}%
+    \long\def\@makefntext##1{\parindent 1em\noindent
+            \hb@xt@1.8em{%
+                \hss\@textsuperscript{\normalfont\@thefnmark}}##1}%
+    \if@twocolumn
+      \ifnum \col@number=\@ne
+        \@maketitle
+      \else
+        \twocolumn[\@maketitle]%
+      \fi
+    \else
+      \newpage
+      \global\@topnum\z@   % Prevents figures from going at top of page.
+      \@maketitle
+    \fi
+    \thispagestyle{plain}\@thanks
+  \endgroup
+  \setcounter{footnote}{0}%
+  \global\let\thanks\relax
+  \global\let\maketitle\relax
+  \global\let\@maketitle\relax
+  \global\let\@thanks\@empty
+  \global\let\@author\@empty
+  %\global\let\@date\@empty
+  %\global\let\@title\@empty
+  \global\let\title\relax
+  \global\let\author\relax
+  \global\let\date\relax
+  \global\let\and\relax
+}
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 2em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1.5em}
+\fi
+
+\renewcommand \thepart {\@Roman\c@part}
+\renewcommand \thechapter {\@arabic\c@chapter}
+\renewcommand \thesection {\@arabic\c@section}
+\renewcommand\thesubsection   {\thesection.\@arabic\c@subsection}
+\renewcommand\thesubsubsection{\thesubsection.\@arabic\c@subsubsection}
+\renewcommand\theparagraph    {\thesubsubsection.\@arabic\c@paragraph}
+\renewcommand\thesubparagraph {\theparagraph.\@arabic\c@subparagraph}
+
+%\makeatletter
+\if@titlepage
+  \renewenvironment{abstract}{%
+      %\titlepage
+      \null\vfil
+      \@beginparpenalty\@lowpenalty
+      \begin{center}%
+        \bfseries \abstractname
+        \@endparpenalty\@M
+      \end{center}
+     % \pagebreak
+      }%
+     {\par\vfil\null}
+\else
+\renewenvironment{abstract}{%
+  \if@twocolumn
+    \section*{\abstractname}%
+  \else
+    \small
+    \begin{center}%
+      {\bfseries \abstractname\vspace{-.5em}\vspace{\z@}}%
+    \end{center}%
+    \quotation
+  \fi}
+  {\if@twocolumn\else\endquotation\fi}
+\fi
+%\makeatother
+
