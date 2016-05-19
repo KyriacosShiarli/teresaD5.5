@@ -131,13 +131,13 @@ UvA, and UPO as reviewers
 
 The technical goal of TERESA is to develop technology that enables a semi-autonomous robot to behave in an acceptable way in social situations. However, it is very hard to determine explicitly what constitutes an “acceptable way” for a robot to behave. This statement acts as motivation in this project, which aims to overcome this difficulty through learning. Work Package 5, and hence this deliverable, is mainly concerned with this idea of learning the correct behaviour from various feedback signals. Specifically, the robot should be able to learn from examples of human controller and from implicit or explicit feedback from people controlling or interacting with the robot.
 
-An important method for teaching a robot a desired behaviour is Inverse Reinforcement Learning (IRL), which was described in detail in the previous deliverable. IRL uses data from succesful demonstrations of a task to learn the demonstrator's underlying \emph{cost function}. This cost function is then used to determine the robots behaviour in new situations. This deliverable offers two contributions to IRL, with social robotics being a strong application focus.
+An important method for teaching a robot a desired behaviour is Inverse Reinforcement Learning (IRL), which was described in detail in deliverable D 5.1. IRL uses data from succesful demonstrations of a task to learn a demonstrator's underlying \emph{cost function}. This cost function is then used to determine the robots behaviour in new situations. This deliverable offers two contributions to IRL, with social robotics being a strong application focus.
 
-The first contribution described is an algorithm we call inverse reinforcement learning from failure (IRLF) and is described in Section \ref{sec:irlf}. The method extends IRL, allowing it to learn from failed demonstrations of a task in combinations with the succesful ones. Experiments on both simulated and real robot data demonstrate that IRLF converges faster and generalises better than methods that do not use this extra source of data, especially when few successful demonstrations are available. 
+The first contribution is an algorithm we call inverse reinforcement learning from failure (IRLF) and is described in Section \ref{sec:irlf}. The method extends IRL, allowing it to learn from data of both succesful and \emph{failed} demonstrations of a task. Experiments on both simulated and real robot data demonstrate that IRLF converges faster and generalises better than methods that do not use this extra source of data, especially when few successful demonstrations are available. 
 
-Our second contribution to IRL is described in Section \ref{sec:rrt-iros} and focuses specifically on the task of social navigation. Social navigation is typically a very hard problem to model using standard IRL methods. However the key characteristic of IRL, i.e., learning cost functions from demonstration, is extremely appealing. Using the strengths and shortcomings of IRL as motivation, we develop Rapidly Exploring Learning Trees (RLT$^*$). This algorithm allows us to learn cost functions for conventional and widely used robotic path planners called Rapidly Exploring Random Trees (RRT$^*$). We describe our algorithm in detail and perform experimental comparisons with other learning algorithms, showing clear improvement in terms of both speed and learning capability.
+Our second contribution to IRL is described in Section \ref{sec:rrt-iros} and focuses on the task of social navigation. Social navigation is typically a very hard problem to model using standard IRL methods. However the key characteristic of IRL, i.e., learning cost functions from demonstration, is extremely appealing. Using the strengths and shortcomings of IRL as motivation, we develop Rapidly Exploring Learning Trees (RLT$^*$). The algorithm allows us to learn cost functions for conventional and widely used robotic path planners called Rapidly Exploring Random Trees (RRT$^*$). We describe our algorithm in detail and perform experimental comparisons with other learning algorithms, showing clear improvement in terms of both speed and learning capability.
 
-A social telepresence robot, must not only be capable of navigating to a target location in a socially normative manner, but also interact with people in an equally appropriate fashion. For example when interacting with a person the robot must keep an appropriate distance and when interacting with a group it must make sure that it is orientated in such a way, such that no person within the group feels excluded. In Section ? we show how thee types of behaviours are learned using supervised learning. We describe how appropriate data of interaction and feedback was collected and how this was used to improve upon the social capabilities of the TERESA robot.
+A social telepresence robot, must not only be capable of navigating to a target location in a socially normative manner, but also interact with people in an equally appropriate fashion. For example when interacting with a person the robot must keep an appropriate distance and when interacting with a group, it must make sure that it is orientated in a way, such that no person within the group feels excluded. In Section ? we show how these types of behaviours are learned using supervised learning. We describe how appropriate data of interaction and feedback was collected and how this was used to improve upon the social capabilities of the TERESA robot.
 
 Finally, to take advantage of the aforementioned social capabilities the robot relies heavily on data from its sensors and the detection software that processes it. False detections of these detectors may affect the policy of the robot resulting in non-social behaviour. For this reason the robots policies must be robust to noise and false positives in the detection modules. Section ?? of this deliverable compares two methods in which this can be achieved. This comparison results in a robust person-facing module for which is then deployed on the TERESA robot.
 
@@ -160,7 +160,7 @@ In addition, in many tasks, it may be easier to demonstrate failure than success
 
 In existing IRL methods, failed demonstrations have been treated as noise \cite{zheng2014robust} and filtered out in order to improve robustness. However, such methods do not actually use such demonstrations for learning.
 
-In this paper, we introduce \emph{inverse reinforcement learning from failure} (IRLF), which is to our knowledge the first IRL algorithm that can learn from both successful and failed demonstrations. In doing so, we address a key difficulty in IRL: the problem is typically under-constrained since many reward functions are consistent with the expert's behaviour.  By exploiting failed demonstrations, our method reduces this ambiguity, resulting in faster and better learning.
+In this section, we introduce \emph{inverse reinforcement learning from failure} (IRLF), which is to our knowledge the first IRL algorithm that can learn from both successful and failed demonstrations. In doing so, we address a key difficulty in IRL: the problem is typically under-constrained since many reward functions are consistent with the expert's behaviour.  By exploiting failed demonstrations, our method reduces this ambiguity, resulting in faster and better learning.
 
 To derive IRLF, we start from the state-of-the-art \emph{maximum causal entropy IRL} \cite{ziebart2008maximum,ziebart2010modelingthesis} method, which is also related to \cite{babes2011apprenticeship}. We propose a new constrained optimisation formulation that accommodates both successful and failed demonstrations while remaining convex.  We then derive update rules for learning policies and reward functions.
 
@@ -206,7 +206,7 @@ The learner aims to find $w$ such that the distance between the vectors $\wideti
 
 IRL methods are typically iterative. An initial guess for $w$ is fed to a planner that produces a policy $\pi$ that is optimal given $w$.  Using $\pi$, trajectories are generated from the same initial states as in $\mathcal{D}$ to compute $\mu^{\pi}|_{\mathcal{D}}$, which is then compared to $\widetilde{\mu}^{\mathcal{D}}$.  Finally, $w$ is updated to reduce to distance between the two expectations, and the process repeats.
 
-The task  of finding $w$ can be formulated as an optimisation problem that requires the expert trajectories to have maximal value \cite{abbeel2004apprenticeship} or that do so by some margin \cite{ratliff2006maximum}. Alternatievely one may employ Bayesian inference \cite{ramachandran2007bayesian,dimitrakakis2012bayesian} to compute a posterior distribution over the weights.  In this paper, we concentrate on methods that learn maximum-entropy policies \cite{ziebart2008maximum,ziebart2010modelingthesis}.  A maximum-entropy approach is attractive because it is probabilistic and thus robust to noise and randomness in the actions of the expert, and results in convex optimisation problems. The methods work by solving the following constrained optimisation problem:
+The task  of finding $w$ can be formulated as an optimisation problem that requires the expert trajectories to have maximal value \cite{abbeel2004apprenticeship} or that do so by some margin \cite{ratliff2006maximum}. Alternatievely one may employ Bayesian inference \cite{ramachandran2007bayesian,dimitrakakis2012bayesian} to compute a posterior distribution over the weights.  In this work, we concentrate on methods that learn maximum-entropy policies \cite{ziebart2008maximum,ziebart2010modelingthesis}.  A maximum-entropy approach is attractive because it is probabilistic and thus robust to noise and randomness in the actions of the expert, and results in convex optimisation problems. The methods work by solving the following constrained optimisation problem:
 \begin{align}
 	\hbox{find:} &\quad\max\limits_{\pi} H(\mathcal{A}^h||\mathcal{S}^h)\label{eq:primal_obj}\\
 \hbox{subject to:}&\quad\widetilde{\mu}^{\mathcal{D}}_k   = \mu^{\pi}_k|_{\mathcal{D}}\quad\forall k \label{eq:features_equality_constraint}\\
@@ -434,7 +434,7 @@ Algorithm \ref{alg:lff} describes IRLF procedurally. First, we compute the empir
 
 \subsection{Experiments}
 
-To evaluate IRLF, we consider three domains. Two of these concern the task of navigating a mobile robot in a social environment, a key challenge problem in social robotics \cite{pacchierotti2006embodied}. Because social rules are difficult to quantify, IRL is well suited to this task \cite{henry2010learning,vasquez2014inverse}. We first consider learning in a simulated navigation domain and then repeat the process using data gathered from experiments on a real telepresence robot.\footnote{Code to replicate the experiments in Sections 4.1 and 4.2 can be found at : \url{https://github.com/KyriacosShiarli/IRLF_aamas2016_Replicate.git}.}
+To evaluate IRLF, we consider three domains. Two of these concern the task of navigating a mobile robot in a social environment, a key challenge problem in social robotics \cite{pacchierotti2006embodied}. Because social rules are difficult to quantify, IRL is well suited to this task \cite{henry2010learning,vasquez2014inverse}. We first consider learning in a simulated navigation domain and then repeat the process using data gathered from experiments on a real telepresence robot.
 
  Our third domain is the \emph{Factory} problem, a well known decision-theoretic benchmark domain\cite{dearden1997abstraction}.
  We compare IRLF to the original \emph{maximum casual entropy IRL} \cite{ziebart2008maximum}, which we henceforth refer to simply as IRL. 
@@ -448,10 +448,9 @@ obstacle (green). The state space contains all possible combined $(x,y)$ positio
 \begin{figure}
 \centering
 %\vspace{-3.3mm}
-    \includegraphics[width=0.15\textwidth]{figures/gridworld.png}
+    \includegraphics[width=0.35\textwidth]{figures/gridworld.png}
 %\vspace{-4mm}
   \caption{Simulated social navigation task.} \label{fig:gridworld}
-\vspace{-7mm}
 \end{figure}
 
 % \begin{figure}[t]
@@ -463,40 +462,34 @@ We first manually define two ground truth reward functions, $R^{\mathcal{D}^*} =
 and generate the respective feature expectations $\widetilde{\mu}^{\mathcal{D}_{train}}$, $\widetilde{\mu}^{\mathcal{F}_{train}}$. These feature expectations are used to learn reward functions and their corresponding  policies using each algorithm under evaluation. Each learned policy $\pi^*$ is then executed from initial states sampled from $P^{s_{1}}_{test}$ to determine $\mu^{\pi^*}|_{test}$, the feature expectations for the policy at those initial conditions. Finally, we compute the values of each policy, at those initial conditions, with respect to the two reward functions, $V^{\pi^*}_{\mathcal{D},test} = (w^{\mathcal{D}^*})^T\mu^{\pi^*}|_{test}$, $V^{\pi^*}_{\mathcal{F},test} = (w^{\mathcal{F}^*})^T\mu^{\pi^*}|_{test}$. A good algorithm will yield a high $V^{\pi^*}_{\mathcal{D},test}$ and a low $V^{\pi^*}_{\mathcal{F},test}$ .
 
 \begin{figure*}[t]
-   \hspace{-2mm}
-  \begin{subfigure}[t]{0.57\columnwidth}
+  \begin{subfigure}[t]{0.33\columnwidth}
     \includegraphics[clip=true,width=1.0\textwidth]{figures/expert_apprentice_contrastive.pdf}
     \caption{Contrasting w.r.t.\ $w^{\mathcal{D}^*}$}
     \label{fig:toy_expert_apprentice_contrastive}
    \end{subfigure}
-   \hspace{19mm}
-   \begin{subfigure}[t]{0.57\columnwidth}
+   \begin{subfigure}[t]{0.33\columnwidth}
     \includegraphics[trim=0.6cm 0.0cm 0.0cm 0.0cm,clip=true,width=0.93\textwidth]{figures/over_expert_apprentice.pdf}
     \caption{Overlapping w.r.t.\ $w^{\mathcal{D}^*}$}
     \label{fig:toy_expert_apprentice_overlapping}
     \end{subfigure}
-    \hspace{13mm}
-    \begin{subfigure}[t]{0.57\columnwidth}
+    \begin{subfigure}[t]{0.33\columnwidth}
     \includegraphics[trim=0.6cm 0.0cm 0.0cm 0.0cm,clip=true,width=0.95\textwidth]{figures/expert_apprentice_complementary.pdf}
     \caption{Complementary w.r.t.\ $w^{\mathcal{D}^*}$}
     \label{fig:toy_expert_apprentice_complementary}
     \end{subfigure}
     \\
 
-    \hspace{-2mm}
-  \begin{subfigure}[t]{0.57\columnwidth}
+  \begin{subfigure}[t]{0.33\columnwidth}
     \includegraphics[clip=true,width=1.0\textwidth]{figures/taboo_apprentice_contrastive.pdf}
     \caption{Contrasting w.r.t. $w^{\mathcal{F}^*}$}
     \label{fig:toy_taboo_apprentice_contrastive}
    \end{subfigure}
-   \hspace{19mm}
-   \begin{subfigure}[t]{0.57\columnwidth}
+   \begin{subfigure}[t]{0.33\columnwidth}
     \includegraphics[trim=0.6cm 0.0cm 0.0cm 0.0cm,clip=true,width=0.93\textwidth]{figures/over_taboo_apprentice.pdf}
     \caption{Overlapping w.r.t.\ $w^{\mathcal{F}^*}$}
     \label{fig:toy_taboo_apprentice_overlapping}
     \end{subfigure}
-    \hspace{13mm}
-    \begin{subfigure}[t]{0.57\columnwidth}
+    \begin{subfigure}[t]{0.33\columnwidth}
     \includegraphics[trim=0.6cm 0.0cm 0.0cm 0.0cm,clip=true,width=0.95\textwidth]{figures/taboo_apprentice_complementary.pdf}
      \caption{Complementary w.r.t.\ $w^{\mathcal{F}^*}$}
     \label{fig:toy_taboo_apprentice_complementary}
@@ -542,12 +535,10 @@ IRLF's performance with respect to $V^{\pi^*}_{\mathcal{F},test}$ (Figure \ref{f
 To test this, we repeated our experiments in the constrasting scenario but with 5, 50, 200 and 2000 initial states for successful demonstrations, while keeping the failed demonstrations to 5. For each algorithm, we plot  $(w^{\mathcal{D}^*})^T\widetilde{\mu}^{\mathcal{D}_{test}}$ - $V^{\pi^*}_{\mathcal{D},test}$ after 60 iterations of the algorithm. The smaller this value, the closer the learner comes to replicating the expert on the test set of initial states. The results, shown in Figure \ref{fig:data_size}, demonstrate that IRLF maintains its superiority over IRL even if the number of initial states for which demonstrations are given rises significantly. 
 
 \begin{figure}
-	\vspace{-5mm}
 	\centering
- 	\includegraphics[clip=true,width=0.4\textwidth]{figures/data_size.pdf}
+ 	\includegraphics[clip=true,width=0.55\textwidth]{figures/data_size.pdf}
  	\caption{Performance of all three methods in the constrasting scenario for different numbers of initial states.}
  	\label{fig:data_size}
- 	\vspace{-4mm}
 \end{figure}
 
 To shed more light on IRLF's behaviour, Figure \ref{fig:rf_plot} plots the original and learned reward functions for IRL and IRLF for the contrasting scenario. In the original reward function $w^{\mathcal{D}^*}$ (Figure \ref{fig:rf_plot_good}), the obstacle is in cell [2,2] and the goal in cell [4,4], which explains the dips and spikes in those locations.  The reward function learned by IRL (Figure \ref{fig:rf_plot_irl}) is flat in the area of the obstacle. However, IRLF, by employing $w^{\mathcal{F}^*}$ (Figure \ref{fig:rf_plot_bad}) learns a reward function (\ref{fig:rf_plot_irlf}) that properly assigns a low reward to the obstacle and its surroundings. The reward function resulting from IRLF can therefore generalise better to unseen initial conditions and environments.
@@ -555,8 +546,8 @@ To shed more light on IRLF's behaviour, Figure \ref{fig:rf_plot} plots the origi
 
 \begin{figure*}[thb]
   \centering
-  \begin{subfigure}[b]{0.48\columnwidth}
-  	\hspace{-6mm}
+  \begin{subfigure}[b]{0.42\columnwidth}
+
     \includegraphics[clip=true,width=\textwidth]{figures/RF_D.png}
 
     
@@ -564,24 +555,24 @@ To shed more light on IRLF's behaviour, Figure \ref{fig:rf_plot} plots the origi
     \label{fig:rf_plot_good}
   \end{subfigure}
   %\hfill
-  \begin{subfigure}[b]{0.48\columnwidth}
-  \hspace{-3mm}
+  \begin{subfigure}[b]{0.42\columnwidth}
+
     \includegraphics[clip=true,width=\textwidth]{figures/RF_F.png}
 
     
     \caption{\ $w^{\mathcal{F}^*}$}
     \label{fig:rf_plot_bad}
   \end{subfigure}  
+  \\
   \label{fig:contrastive}
-  \begin{subfigure}[b]{0.48\columnwidth}
-
+  \begin{subfigure}[b]{0.42\columnwidth}
     \includegraphics[clip=true,width=\textwidth]{figures/RF_IRL.png}
     \caption{IRL}
     \label{fig:rf_plot_irl}
   \end{subfigure}
   %\hfill
-  \begin{subfigure}[b]{0.48\columnwidth}
-  	\hspace{5mm}
+  \begin{subfigure}[b]{0.42\columnwidth}
+
     \includegraphics[clip=true,width=\textwidth]{figures/RF_IRLF.png}
     \caption{IRLF}
     \label{fig:rf_plot_irlf}
@@ -615,14 +606,14 @@ While this problem has been previously tackled from the perspective of off-line 
 \begin{figure}[tbh]
 	\centering
 %	\hspace{-5cm}
-      \begin{subfigure}[b]{0.455\columnwidth}
+      \begin{subfigure}[b]{0.4\columnwidth}
       \hspace{-11mm}
     \includegraphics[clip=true,width=1.25\textwidth]{figures/factory_1.pdf}
     \caption{Value w.r.t.\ $w^{\mathcal{D}^*}$}
     \label{fig:factory_1}
   \end{subfigure}
  % \hspace{5mm}
-  \begin{subfigure}[b]{0.455\columnwidth}
+  \begin{subfigure}[b]{0.4\columnwidth}
     \includegraphics[trim=0.8cm 0.0cm 0.0cm 0.0cm,clip=true,width=1.20\textwidth]{figures/factory_2.pdf}
     \caption{Value w.r.t.\ $w^{\mathcal{F}^*}$}
     \label{fig:factory_2}
@@ -672,10 +663,9 @@ For safety reasons, the failed dataset $\mathcal{F}$, which consists of $59$ tra
 \begin{figure}[t]     
 %  \vspace{-2mm}
   \centering
-    \includegraphics[width=0.77\columnwidth]{figures/data_plot.png}
+    \includegraphics[width=0.55\columnwidth]{figures/data_plot.png}
   \caption{A sample of trajectories from the real navigation domain data set. Darker dots occur later in time.}
   \label{fig:data}
-  \vspace{-2mm}
 \end{figure}
 
 To model this domain as an MDP, we define a state space $S$ consisting of discretised positions for both the obstacle and the robot, as well as the discretised orientation of the obstacle, yielding a total of $837,808$ states. The action space consists of eight possible directions for robot movement, and an action that stops the robot. Using $\mathcal{D}$, we learned a factored stochastic transition function $T$. Furthermore, we defined a feature set $\phi(s,a)$ of $1401$ binary features, encoding the relative position of the robot from both the target and the obstacle, as well as their relative orientations. 
@@ -692,30 +682,29 @@ Figure \ref{fig:real_data} shows the results of our experiments on the real data
 Overall, the consistency of these results with those of the simulated domain provides further confirmation that failed demonstrations are useful for IRL, allowing it to generalise better to new initial conditions.  Furthermore, IRLF is a useful method for exploiting this data.
 
 \begin{figure}[htb]
-	\vspace{1mm}
+
 %  hspace{-16pt}
 	\centering
-	\begin{subfigure}[b]{0.49\columnwidth}
-    \includegraphics[scale = 0.23]{figures/gp.pdf}
+	\begin{subfigure}[b]{0.4\columnwidth}
+    \includegraphics[scale = 0.29]{figures/gp.pdf}
     \end{subfigure}
-    \begin{subfigure}[b]{0.49\columnwidth}
-    \includegraphics[scale = 0.23]{figures/bp.pdf}
+    \begin{subfigure}[b]{0.4\columnwidth}
+    \includegraphics[scale = 0.29]{figures/bp.pdf}
   	\end{subfigure}
   \caption{Sample trajectories from $w^{\mathcal{D}^*}$ (top) and $w^{\mathcal{F}^*}$ (bottom). Darker dots occur later in time.} %These reward functions were learned from real data. The alpha channel denotes time}}
   \label{fig:paths}
-  \vspace{-2mm}
 \end{figure}
 
 
 \begin{figure}[h!]
 
 	\centering
-	\begin{subfigure}[b]{0.49\columnwidth}
+	\begin{subfigure}[b]{0.4\columnwidth}
     \includegraphics[trim=0.5cm 0.5cm 0.2cm 0.2,clip=true,width=1.1\textwidth]{figures/expert_apprentice_real.pdf}
     \caption{Value w.r.t.\ $w^{\mathcal{D}^*}$}
     \end{subfigure}
-    %\hspace{mm}
-    \begin{subfigure}[b]{0.49\columnwidth}
+    \hspace{6mm}
+    \begin{subfigure}[b]{0.4\columnwidth}
     \includegraphics[trim=0.5cm 0.5cm 0.2cm 0.2,clip=true,width=1.1\textwidth]{figures/taboo_apprentice_real.pdf}
     \caption{Value w.r.t.\ $w^{\mathcal{F}^*}$}
   	\end{subfigure}
@@ -729,7 +718,7 @@ Overall, the consistency of these results with those of the simulated domain pro
 
 % \sw{This can be modeled on the new abstract once it's written.  We do need some future work ideas.} \jm{Perhaps we can mention further robot tests and validation of these results as future work. There was also this idea on the table of coupling this learning from failure approach with other IRL / LfD algorithms}
 
-This paper introduced IRLF, the first inverse reinforcement learning algorithm that can learn from successful as well as failed demonstrations simultaneously. Starting from the maximum causal entropy IRL method, we proposed a new constrained optimisation formulation that accommodates both types of demonstrations while remaining convex and derived update rules for learning reward functions and policies. Our simulated navigation experiments investigated the properties of IRLF in cases where the succesful and failed demonstrations are either constrasting, overlapping, or complementary. The results in the overlapping scenario show that IRLF works even if the failed demonstrations are similar to the successful ones. We also presented results on a simulated factory domain as well as on real robot data from a social navigation task. These results clearly suggest that IRLF consistently learns faster and generalises better than the original IRL algorithm in consideration. In future work, we aim to investigate whether other IRL methods can also be extended to exploit failed demonstrations. In addition, we plan to conduct more experiments with real robots, including deploying an IRLF-learned policy on a robot.
+This section introduced IRLF, the first inverse reinforcement learning algorithm that can learn from successful as well as failed demonstrations simultaneously. Starting from the maximum causal entropy IRL method, we proposed a new constrained optimisation formulation that accommodates both types of demonstrations while remaining convex and derived update rules for learning reward functions and policies. Our simulated navigation experiments investigated the properties of IRLF in cases where the succesful and failed demonstrations are either constrasting, overlapping, or complementary. The results in the overlapping scenario show that IRLF works even if the failed demonstrations are similar to the successful ones. We also presented results on a simulated factory domain as well as on real robot data from a social navigation task. These results clearly suggest that IRLF consistently learns faster and generalises better than the original IRL algorithm in consideration. In future work, we aim to investigate whether other IRL methods can also be extended to exploit failed demonstrations. In addition, we plan to conduct more experiments with real robots, including deploying an IRLF-learned policy on a robot.
 
 
 \section{Rapidly Exploring Learning Trees}
@@ -746,7 +735,7 @@ For these reasons, several researchers have proposed replacing the planning step
 In path planning, Rapidly Exploring Random Trees (RRTs)~\cite{lavalle1998rapidly} are popular because they cope well with continuous and high-dimensional domains and can elegantly handle kinodynamic constraints. The RRT$^*$ algorithm \cite{karaman2011sampling}, which extends RRTs to incorporate a cost function, is especially effective. However, the cost functions used by RRT$^*$ are typically simple and hand-coded and, to our knowledge, no methods have been developed to learn RRT$^*$ cost functions from demonstrations.
 
 
-In this paper, we propose Rapidly Exploring Learning Trees (RLT), which learns RRT$^*$ cost functions from demonstration. Specifically we modify Maximum Margin Planning to use RRT$^*$ as a planner. Furthermore, we propose a caching scheme that greatly reduces the computational cost of this approach. RLT requires no additional planner assumptions other than those inherent in RRT$^*$, making it particularly easy to implement. 
+In this section, we propose Rapidly Exploring Learning Trees (RLT), which learns RRT$^*$ cost functions from demonstration. Specifically we modify Maximum Margin Planning to use RRT$^*$ as a planner. Furthermore, we propose a caching scheme that greatly reduces the computational cost of this approach. RLT requires no additional planner assumptions other than those inherent in RRT$^*$, making it particularly easy to implement. 
 
 We evaluate RLT on real and simulated data from a social navigation scenario. The results demonstrate that RLT achieves better performance at lower computational cost than methods that learn path planning cost functions for deterministic planners.
 
@@ -842,7 +831,7 @@ where,
 	\tilde{\zeta}^*_{o_i,g_i} = \argmin_{\zeta \in Z_{o_i,g_i}} C(\zeta) + L_i(\zeta). \label{eq:augmented_max}
 \end{equation}
 
-The inverse problem can therefore be seen as an iterative procedure, that first solves \eqref{eq:augmented_max} in the inner loop while keeping the weights constant. Based on that solution, it updates the weights using \eqref{eq:update1} in the outer loop. The weights at convergence represent the cost function that is used to plan the future behaviour of the agent. In \cite{ratliff2006maximum}, A$^*$ search was used for planning in the inner loop, assuming that the domain contained acyclic positive costs. In this paper, we make the same assumptions but develop methods that use RRT$^*$ for planning.
+The inverse problem can therefore be seen as an iterative procedure, that first solves \eqref{eq:augmented_max} in the inner loop while keeping the weights constant. Based on that solution, it updates the weights using \eqref{eq:update1} in the outer loop. The weights at convergence represent the cost function that is used to plan the future behaviour of the agent. In \cite{ratliff2006maximum}, A$^*$ search was used for planning in the inner loop, assuming that the domain contained acyclic positive costs. In this work, we make the same assumptions but develop methods that use RRT$^*$ for planning.
 
 \subsection{Method}
 	In this section, we propose Rapidly Exploring Learning Trees (RLT$^*$).  We first propose a generic extension to the maximum margin approach that we call Approximate Maximum Margin Planning.  We then show how an implementation of this approach with an RRT$^*$ planner and a novel caching scheme yields RLT$^*$.
@@ -1006,7 +995,7 @@ Algorithm \ref{alg:ammp} describes Rapidly Exploring Learning Trees (RLT$^*$), w
 	% \RETURN $R,\pi$
 
 
-For RRT$^*$ the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is very hard to quantify since it also depends on the size and nature of $S$ as well as the cost function we are using -which also changes with every iteration. For this reason, in this paper we resort to an experimental assesment of the ability of RRT$^*$ to sample the right constraints at every iteration of RLT$^*$ and hence allow the learning of a cost function from a set of demonstrated paths.
+For RRT$^*$ the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is very hard to quantify since it also depends on the size and nature of $S$ as well as the cost function we are using -which also changes with every iteration. For this reason, in this work we resort to an experimental assesment of the ability of RRT$^*$ to sample the right constraints at every iteration of RLT$^*$ and hence allow the learning of a cost function from a set of demonstrated paths.
 
 
 \subsection{Experiments}
@@ -1022,7 +1011,7 @@ In this section, we experimentally compare RLT$^*$ to the original MMP algorithm
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
-
+  \centering
       \begin{subfigure}[b]{0.435\columnwidth}
 	\hspace{5mm}
     \includegraphics[width=0.7\textwidth]{figures/people.png}
@@ -1081,17 +1070,15 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 \begin{figure}[tbh]
 	\centering
 %	\hspace{-5cm}
-      	\hspace{-12mm}
-      \begin{subfigure}[b]{0.455\columnwidth}
+      \begin{subfigure}[b]{0.45\columnwidth}
 
-    \includegraphics[clip=true,width=1.28\textwidth]{figures/cost_diff_train.png}
+    \includegraphics[clip=true,width=1.\textwidth]{figures/cost_diff_train.png}
     \caption{Train}
     \label{fig:train_results}
   \end{subfigure}
  % \hspace{5mm}
- \hspace{5mm}
-  \begin{subfigure}[b]{0.455\columnwidth}
-    \includegraphics[clip=true,width=1.28\textwidth]{figures/cost_diff_val.png}
+  \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[clip=true,width=1.\textwidth]{figures/cost_diff_val.png}
     \caption{Test}
     \label{fig:test_results}
   \end{subfigure} 
@@ -1105,6 +1092,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 
 
 	\begin{table}[]
+  \centering
 	\scalebox{0.83}{
 	\begin{tabular}{|l|l|l|l|l|}
 	\hline
@@ -1121,7 +1109,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 	\begin{figure}
 	\centering
 	%\vspace{-3.3mm}
-	    \includegraphics[width=0.22\textwidth]{figures/path_compare.png}
+	    \includegraphics[width=0.3\textwidth]{figures/path_compare.png}
 	%\vspace{-4mm}
 	  \caption{Qualitative comparison of paths. Goal is at the top left, robot begins on the bottom right. Black: demonstration path. Red: RLT$^*$. Green: MMP$_{0.8}$, Magenta: MMP$_{0.3}$ }
 	  \label{fig:path_compare}
@@ -1152,7 +1140,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 
 
 \subsection{Conclusion and Future Work}
-In this paper, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, we proposed a caching scheme that greatly reduces the computational cost of this approach. Experimental results on real and simulated data from a social navigation scenario showed that RLT$^*$ achieves better performance at lower computational cost than existing methods.
+In this section, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, we proposed a caching scheme that greatly reduces the computational cost of this approach. Experimental results on real and simulated data from a social navigation scenario showed that RLT$^*$ achieves better performance at lower computational cost than existing methods.
 
  Although our experimental comparison used A$^*$ as a baseline, RLT$^*$ is also well suited to situations where deterministic planners naturally fail, e.g., a manipulator with many degrees of freedom. A clear avenue for future work is to design learning algorithms that explicitly take into account the probabilistic nature of RRT$^*$. We also plan to evaluate RLT$^*$ on data gathered from real robots.
 
