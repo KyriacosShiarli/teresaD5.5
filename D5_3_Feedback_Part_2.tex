@@ -730,7 +730,7 @@ This section introduced IRLF, the first inverse reinforcement learning algorithm
 
 \section{Rapidly Exploring Learning Trees}
 \label{sec:rrt-iros}
-As we have seen in previous sections, IRL is a general method and can be used in conjunction with any decision-making task. When applied to robotics however, IRL falls under the more general umbrella term of Learning from Demonstration (LfD) \cite{argall2009survey}. LfD is of great interest to roboticists because it can avoid the need for tedious manual programming of complex behaviours. While most LfD methods rely on supervised learning to directly learn policies, certain approaches, such as IRL and the closely related field of inverse optimal control (IOC) \cite{kalman1964linear} instead learn \emph{cost functions} from demonstration. These cost functions are then used to \emph{plan} the robot's behaviour. 
+As we have seen in previous sections, IRL is a general method and can be used in conjunction with any decision-making task. When applied to robotics however, IRL falls under the more general umbrella term of Learning from emonstration (LfD) \cite{argall2009survey}. LfD is of great interest to roboticists because it can avoid the need for tedious manual programming of complex behaviours. While most LfD methods rely on supervised learning to directly learn policies, certain approaches, such as IRL and the closely related field of inverse optimal control (IOC) \cite{kalman1964linear} instead learn \emph{cost functions} from demonstration. These cost functions are then used to \emph{plan} the robot's behaviour. 
 
 Cost functions tend to be more general and robust to changes in the environment such as friction in a manipulator's joints. A robot trained in a supervised manner has less chance of adapting than one that has been trained using IRL or IOC because the cost function remains unchanged. In addition, cost functions are thought to be more succinct representations of the aims of the agent \cite{abbeel2004apprenticeship}. %For example, an agent that whose aim is to get as fast as possible to a goal location. The policy for such an agent will be much harder to interpret when compared to its cost function. 
 
@@ -1005,7 +1005,7 @@ For RRT$^*$ the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is very
 
 
 \subsection{Experiments}
-In this section, we experimentally compare RLT$^*$ to the original MMP algorithm implemented using an A$^*$ planner, as well as to an ablated version of RLT$^*$ that does not using caching.
+In this section, we experimentally compare RLT$^*$ to the original MMP algorithm implemented using an A$^*$ planner, as well as to an ablated version of RLT$^*$ that does not use caching.
 	
 	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{okallearning,henry2010learning,vasquez2014inverse} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
 	
@@ -1099,7 +1099,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 
 	\begin{table}[]
   \centering
-	\scalebox{0.83}{
+	\scalebox{1.}{
 	\begin{tabular}{|l|l|l|l|l|}
 	\hline
 	               & MMP$_{0.8}$     & MMP$_{0.3}$       & RLT$^*$-NC  & RLT$^*$ \\ \hline
