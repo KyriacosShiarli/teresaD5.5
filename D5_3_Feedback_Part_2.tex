@@ -1420,6 +1420,16 @@ The cost is given by the likelihood of the state not receiving a perfect grade (
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
 \label{sec:conclusions}
+This deliverable has summarised our progress for Work Package 5 from month 15 of the project until month 30. Significant progress has been achieved in all aspect of social behaviour learning on the TERESA robot. 
+
+ An important aspect of this progress is in terms of learning from human demonstrations, using IRL. Firstly we have enabled the robot to learn from failed demosntrations as well as succesful ones in a unified principled framework. We have demonstrated that our method is capable of utilising the failed demonstrations in conjunction with the succesful ones to learn faster and better. Secondly we have made developed a novel IRL method called, RLT$^*$ that works with RRT$^*$ as the underlying planner. RRT's are at the heart of TERESA's path planning module, thus learning directly using this planners is bound to produce superior learning results. We have also shown that our method is faster and better that a similar method that uses deterministic planners. A clear avenue of future work is to deploy RLT$^*$ on the real system. Furthermore we plan to integrate these methods together and evaluate any improvement on the real system.
+
+ We have also reported significant progress in terms of experimentation and implementation of social conversation policies.\todo{Conclusions and future work from Richard?}
+
+ Finally, in the last months of the project we will be integrating these cost functions to derive navigation and conversation policies for the robot.
+ \todo{Ask Diederik?}
+
+
 
 \bibliographystyle{plain}
 \bibliography{references}
