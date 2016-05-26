@@ -73,7 +73,7 @@
         \hline
         \rowcolor{gray!50}
         Date and Version Number & Author & Comments\\ \hline
-        22.07.2015 v0.1 & Jo\~ao Messias & Initial Verson.\\
+        22.07.2015 v0.1 & Jo\~ao Messias \&\hfill Kyriacos Shiarlis & Initial Verson.\\ \hline
 \end{tabular}
 
 \end{documentinfo}
@@ -1148,23 +1148,23 @@ The task of engaging in social conversation through the TERESA robot has differe
 
 As discussed in the previous Deliverable 5.1\todo{cite}, there are multiple sources of feedback from which some measure of the social adequacy of the behaviors of the robot may potentially be inferred. Namely:
 \begin{itemize}
-\item The reactions of the telepresent visitor;
-\item The reactions of the interaction targets engaged in conversation with the Visitor through the robot;
+\item The reactions of the telepresent visitor\footnote{We here use the same terminology for the conversation task as in previous deliverables. Namely, the ``visitor'' is the person using the robot remotely; and the ``interaction targets'' are any persons which are physically co-present with the robot and engaged in the conversation.};
+\item The reactions of the interaction targets engaged in conversation with the visitor through the robot;
 \item The demonstrations of social (and possibly asocial) behavior by human experts. 
 \end{itemize}
 
-In this section, we describe our progress of learning social cost functions for social conversation through feedback that is provided from 1) the Visitor and 2) the interaction targets. Learning social cost functions from expert demonstrations falls under the scope of the IRL methods described in Section \ref{sec:irlf}, which can also be applied in the context of social conversation, and constitutes future work.
+In this section, we describe our progress of learning social cost functions for social conversation through feedback that is provided from 1) the visitor and 2) the interaction targets. Learning social cost functions for social conversation from expert demonstrations falls under the scope of the IRL methods described in Section \ref{sec:irlf}, which can also be applied in this context, and constitutes future work.
 
 Our main contributions in this topic can be summarized as follows:
 \begin{itemize}
-\item In Section \ref{sec:initial_experiment}, we describe local experiments that were performed at the University of Amsterdam for a conversation scenario with the TERESA robot in various conditions, where we recorded explicit negative feedback from the Visitor. This data was used to extract a measure of social cost related to proxemics form the perspective of the Visitor. This cost function based on explicit feedback complements the cost functions that we had described in Deliverable 5.1 that were based on implicit feedback from the Visitor;
+\item In Section \ref{sec:initial_experiment}, we describe local experiments that were performed at the University of Amsterdam for a conversation scenario with the TERESA robot in various conditions, where we recorded explicit negative feedback from the visitor. This data was used to extract a measure of social cost related to proxemics form the perspective of the visitor. This cost function based on explicit feedback complements the cost functions that we had described in Deliverable 5.1 that were based on implicit feedback from the visitor;
 \item In Section \ref{sec:group conversations}, we present an analysis of the data that was collected by the TERESA consortium partners at the University of Twente (UT), through the experimental process described in Deliverable 3.1. We processed this data and extracted from it a measure of social cost related to proxemics from the explicit qualitative feedback provided by the participants of that study.
 \end{itemize}
 
 \subsection{Local Experiment on Social Conversation}
 \label{sec:initial_experiment}
 
-An experiment regarding social conversation with the TERESA robot was conducted at the University of Amsterdam, between <fill in dates>\todo{confirm the dates w/ Richard}. The purpose of this experiment was twofold: firstly, to record both implicit and explicit feedback of the Visitor and an interaction target to the behavior of the robot under controlled conditions, so as to enable the learning of cost functions that are representative of the social acceptability of those behaviors; secondly, to determine an appropriate representation of the state space for a decision-theoretic representation of the control task during autonomous social conversation.
+An experiment regarding social conversation with the TERESA robot was conducted at the University of Amsterdam, between <fill in dates>\todo{confirm the dates w/ Richard}. The purpose of this experiment was twofold: firstly, to record both implicit and explicit feedback of the visitor and an interaction target to the behavior of the robot under controlled conditions, so as to enable the learning of cost functions that are representative of the social acceptability of those behaviors; secondly, to determine an appropriate representation of the state space for a decision-theoretic representation of the control task during autonomous social conversation.
 
 \subsubsection{Experimental Setup and Procedure}
 
@@ -1180,32 +1180,32 @@ The general set-up of the local social conversation experiment followed closely 
 In terms of hardware, the experimental setup was distributed across five networked locations:
 \begin{itemize}
 \item The TERESA robot;
-\item The computer running the Giraff Interface, used by the Visitor to communicate with the interaction target through the robot;
+\item The computer running the Giraff Interface, used by the visitor to communicate with the interaction target through the robot;
 \item The computer used by the expert to control the robot;
-\item An auxiliary computer to record the data captured by a Dalsa GENIE camera that was directed towards the face of the Visitor, in accordance with the general TERESA system architecture;
+\item An auxiliary computer to record the data captured by a Dalsa GENIE camera that was directed towards the face of the visitor, in accordance with the general TERESA system architecture;
 \item An auxiliary computer relaying a feed from an overhead camera installed in the interaction room. The camera was used to give the expert a better overview of the room, and used for later validation of the data.
 \end{itemize}
 
-The Visitor was asked to give explicit feedback, in the form of keyboard presses, whenever the robot performed behaviors which were socially unacceptable.
+The visitor was asked to give explicit feedback, in the form of keyboard presses, whenever the robot performed behaviors which were socially unacceptable.
 
 Each experimental run involved two subjects, and was split into three phases. In the first of these phases, we intended to study the reactions of the participants to approach/retreat behaviors by the robots, similarly to what had been performed in the inductive user study described in Deliverable 3.1, as well as to study the correlation between the range of operation of the robot (its distance to the interaction target) during conversation, and social acceptability. To achieve this, at regular intervals during the experiment, we alternatingly performed the following behaviors in random order:
 \begin{itemize}
 \item The robot moved closer or farther away from the interaction target, at the discretion of the expert. The expert was instructed to attempt to elicit reactions from the participants, and therefore explored a varied range of distances to the interaction target during conversation, both within as well as outside of the expected operational conditions for the TERESA robot. For instance, at times the expert moved the robot as close as possible to the interaction target without placing the subject in danger of collision; and also placed the robot as far as physically possible from the interaction target;
-\item The Interaction target was asked to move to a distance with respect to the robot which he/she felt was:
+\item The interaction target was asked to move to a distance with respect to the robot which he/she felt was:
   \begin{itemize}
-  \item Normal;
-  \item As close as possible without becoming socially inappropriate;
-  \item As far as possible without becoming socially inappropriate.
+  \item Normal for a one-to-one conversation;
+  \item As close as possible without becoming socially unacceptable;
+  \item As far as possible without becoming socially unacceptable.
   \end{itemize}
 \end{itemize}
 
-The Visitor and Interaction target were instructed to maintain a normal conversation throughout each experimental run, and were informed \emph{a priori} that, at the request of the experimenter, either the robot or the interaction target would need to move (but not both simultaneously).
+The visitor and the interaction target were instructed to maintain a normal conversation throughout each experimental run, and were informed \emph{a priori} that, at the request of the experimenter, either the robot or the interaction target would need to move (but not both simultaneously).
 
-In the second phase of each experimental run, the Visitor and Interaction target continued the conversation while expert executed various socially acceptable and non acceptable behaviours. Acceptable behaviours include maintaining the correct body pose and correctly changing the distance based on social cues (e.g. hearing problems); whereas the non acceptable behaviours include suddenly turning away from or randomly changing the distance to the interaction target. In this phase we focused especially on eliciting explicit negative feedback from the Visitor by changing the orientation of the robot during conversation.
+In the second phase of each experimental run, the visitor and interaction target continued the conversation while expert executed various behaviors at different levels of perceived social acceptability. Acceptable behaviours include maintaining the correct body pose and correctly changing the distance based on social cues (e.g. hearing problems); whereas unacceptable behaviours include suddenly turning away from or randomly changing the distance to the interaction target. In this phase we focused especially on eliciting explicit negative feedback from the visitor by changing the orientation of the robot during conversation.
 
-The third and final phase of the experimental runs explored the influence of communication difficulties on proxemics. Communication problems can be prevalent in the elderly due hearing problems. To simulate such a situation, we introduced artificial background noise (i.e. sounds of a cafeteria) at various levels during the experiment, and repeated the approach/retreat conditions of the first phase. After these were performed the interaction target was asked to sit down, while the expert was still free to change the distance of the robot. The rationale for this step was that, while sitting down, people may exhibit characteristic reactions to hearing difficulties (such as leaning forward, as it has been identified by UT in their own experiments), which we intended to record.
+The third and final phase of the experimental runs explored the influence of communication difficulties on proxemics. Communication problems can be prevalent in the elderly due hearing problems. To simulate such a situation, we introduced artificial background noise (i.e. sounds of a cafeteria) at various levels during the experiment, and repeated the approach/retreat conditions of the first phase. After these were performed, the interaction target was asked to sit down, while the expert was still free to change the distance of the robot. The rationale for this step was that, while sitting down, people may exhibit characteristic reactions to hearing difficulties which we intended to record (such as leaning forward, as it had been identified by UT in their own experiments).
 
-The Visitor and Interaction target were then asked to switch places. Therefore, we performed two experimental runs for each pair of subjects. At the end of the two experimental runs, an interview was conducted with the subjects to obtain some additional insight on the behaviour of the robot.
+The visitor and interaction target were then asked to switch places. Therefore, we performed two experimental runs for each pair of subjects. At the end of the two experimental runs, an interview was conducted with the subjects to obtain some additional insight on the behaviour of the robot.
 
 In total, $12$ \todo{Richard, is this correct?} subjects were involved in our local experiments, which consisted of a mix of student and faculty voluteers.
 
@@ -1217,9 +1217,9 @@ In total, $12$ \todo{Richard, is this correct?} subjects were involved in our lo
 {\bf A Common Representation of the State Space for Autonomous Social Conversation}
 \label{sec:defining_the_state-space}
 
-In the previous deliverable in this Work Package (Deliverable 5.2\todo{cite}), we have discussed in detail the relevant control variables for the TERESA social conversation task, and proposed a set of high-level actions for this task. Notably, we have concluded that most of the actions involved in social conversation require controlling the relative distance and bearing between the robot and one or more interaction targets, through the linear and angular velocity of the base of the robot. This conclusion was supported by the inductive user study conducted by UT, which demonstrated that the distance and bearing of the robot with respect to the interaction targets are both variables of interest in order to maintain social acceptability. 
+In the previous deliverable in this Work Package (Deliverable 5.2 \cite{d5.2}), we have discussed in detail the relevant control variables for the TERESA social conversation task, and proposed a set of high-level actions for this task. Notably, we have concluded that most of the actions involved in social conversation require controlling the relative distance and bearing between the robot and one or more interaction targets, through the linear and angular velocity of the base of the robot. This conclusion was supported by the inductive user study conducted by UT, which demonstrated that the distance and bearing of the robot with respect to the interaction targets are both variables of interest in order to maintain social acceptability. 
 
-Naturally, the most useful representations of social cost functions in this conversation task should defined over the same variables which are to be controlled by the autonomous behaviors of the robot. Therefore, our aim is to obtain a representation of social cost as a function of distance and bearing w.r.t the interaction target(s), and potentially also the linear and angular velocity of the robot. These are inherently continuous physical variables. Specifically, given the position of the Interaction target as $p_I = [x_I\,\,y_I]^T$ and of the robot $p_R = [x_R\,\,y_R]^T$ in some common fixed frame, we define \emph{distance} in the conversation task as $\rho = ||p_I - p_R||$ where $||\cdot||$ is the Euclidean norm, and \emph{bearing} as $\phi = \arctan \frac{y_I - y_R}{x_I - x_R} - \theta$, where $\theta\in(-\pi,\pi]$ is the orientation of the robot in the same fixed frame. We also take the linear and angular velocity of the robot to be $v = dp_R/dt$ and $w = d\theta/dt$ respectively.
+Naturally, the most useful representations of social cost functions in this conversation task should defined over the same variables which are to be controlled by the autonomous behaviors of the robot. Therefore, our aim is to obtain a representation of social cost as a function of distance and bearing w.r.t the interaction target(s), and potentially also the linear and angular velocity of the robot. These are inherently continuous physical variables. Specifically, given the position of the interaction target as $p_I = [x_I\,\,y_I]^T$ and of the robot $p_R = [x_R\,\,y_R]^T$ in some common fixed frame, we define \emph{distance} in the conversation task as $\rho = ||p_I - p_R||$ where $||\cdot||$ is the Euclidean norm, and \emph{bearing} as $\phi = \arctan \frac{y_I - y_R}{x_I - x_R} - \theta$, where $\theta\in(-\pi,\pi]$ is the orientation of the robot in the same fixed frame. We also take the linear and angular velocity of the robot to be $v = dp_R/dt$ and $w = d\theta/dt$ respectively.
 
 However, we note that the control solutions that we intend to develop for the autonomous behaviors of the robot during social conversation are based on decision-theoretic concepts, and it is not straightforward to use continuous representations of states and actions in these frameworks, since that would make these approaches intractable. Therefore, it is useful to first identify a compact, discretized representation of the state and action spaces, and to represent our cost functions in the same domains.
 
@@ -1230,7 +1230,7 @@ During our experimental runs, we collected the distances between the robot and t
 \rho_{close} = 0.71m,\quad \rho_{normal} = 1.16m,\quad \rho_{far} = 1.68m.
 \end{align*}
 
-\todo[inline]{Joao: Richard should run t-tests on this data to actually test the hypothesis that there is no influnce in using the robot, using the human proxemic values published in the sociological literature. If there is no influence we might as well use those, instead of the values reported here..}
+\todo[inline]{Joao: Richard should run t-tests on this data to actually test the hypothesis that there is no influnce in using the robot, using the human proxemic values published in the sociology literature. If there is no influence we might as well use those, instead of the values reported here..}
 
 In the presence of background noise, the interaction targets approached the robot significantly closer than their normal approach distance.
 The distance at which the interaction targets approached the robot while there are hearing problems lies between their definition of close and normal distances. 
@@ -1250,13 +1250,13 @@ Based on this idea, we have divided the angular range in front of the robot into
 \begin{align*}
   \Phi:=\{-50º,-40º,-30º,-20º,-10º,0º,10º,20º,30º,40º,50º\},
 \end{align*}
-and $F_\phi:\{b_i\}_{i=1,\ldots,11}\rightarrow \Phi$ where $\{b_i\}_{i=1,\ldots,5}=:B$ is the discrete \emph{bearing state} space. Then the bearing state at time $t$ is defined as:
+and $F_\phi:\{b_i\}_{i=1,\ldots,11}\rightarrow \Phi$ where $\{b_i\}_{i=1,\ldots,11}=:B$ is the discrete \emph{bearing state} space. Then the bearing state at time $t$ is defined as:
 \begin{align*}
-  b_t = \argmin_{b\in B}|F_\phi(b) - deg(\phi_t)|,
+  b(t) = \argmin_{b\in B}|F_\phi(b) - deg(\phi_t)|,
 \end{align*}
 where $\phi_t$ is the bearing at time $t$, and $deg(\phi_t)=\phi_t\times\frac{180}{\pi}$.
 
-Another important fact regarding the bearing is that the robot is symmetric and the conversation task, \emph{a priori}, has no reason to favor one angular direction over the other. Therefore we assume that the social cost with should also be symmetric with respect to the bearing (i.e. the cost at the left of the robot should equal the cost at the right of the robot). This hypothesis is also proven in section \ref{sec:group_result} and leads to requiring less experimental data and removes possible biases during the experiments. During execution, however, the actions of the robot naturally should depend on the actual direction of the interaction target.
+Another important fact regarding the bearing is that the robot is symmetric and the conversation task, \emph{a priori}, has no reason to favor one angular direction over the other. Therefore we assume that the social cost with should also be symmetric with respect to the bearing (i.e. the cost at the left of the robot should equal the cost at the right of the robot). This hypothesis is also proven in section \ref{sec:group_result} and leads to requiring less experimental data and removes possible biases during the experiments. During execution, however, the actions of the robot naturally should depend on the actual direction of the interaction target. In Figure \ref{fig:state_viz}, the different angular states are reperesented in grayscale, and this symmetry can also be seen.
 
 
 \begin{figure}
@@ -1266,11 +1266,9 @@ Another important fact regarding the bearing is that the robot is symmetric and 
     	\label{fig:state_viz}
 \end{figure}
 
-In Figure \ref{fig:state_viz}, the different angular states are denoted by the different shades of grey where this symmetry can also be seen.
-
 {\bf Social Cost from Explicit Negative Feedback}
 
-During our local experiments, we collected a total of 65 instances of explicit negative feedback from the participants in the role of Visitor, in the form of key presses. As each test subject provided a different total amount of explicit feedback (some participants were more reserved than others in their use of the feedback functionality), a normalization was applied to the amount of feedback provided by each user. In Figure \ref{fig:button_presses}, the normalized relative frequency of explicit feedback by the Visitors is plotted against the states of the robot, as per the state space description described in the previous section. This representation makes it evident that there is a very sparse distribution of key presses over states. Since there is insufficient data to fairly estimate the frequency of negative feedback at each particular distance-bearing pair, this representation makes it seem (incorrectly) that higher bearing values would be associated with lower social cost, which is not only unintuitive, but also contradicts UT's original findings.
+During our local experiments, we collected a total of 65 instances of explicit negative feedback from the participants in the role of visitor, in the form of key presses. As each test subject provided a different total amount of explicit feedback (some participants were more reserved than others in their use of the feedback functionality), a normalization was applied to the amount of feedback provided by each user. In Figure \ref{fig:button_presses}, the normalized relative frequency of explicit feedback by the visitors is plotted against the states of the robot, as per the state space description described in the previous section. This representation makes it evident that there is a very sparse distribution of key presses over states. Since there is insufficient data to fairly estimate the frequency of negative feedback at each particular distance-bearing pair, this representation makes it seem (incorrectly) that higher bearing values would be associated with lower social cost, which is not only unintuitive, but also contradicts UT's original findings.
 
 \todo[inline]{Joao: This analysis is incomplete. We should at least account for the fact that each state was visited a different number of times. Also, we could then fit a smoother function on the data, e.g. through logistic regression (or using an NN to predict the value softly, which is essentially the same). I will discuss this w/ Richard to have it fixed ASAP.}
 
@@ -1304,7 +1302,7 @@ Given the distance intervals that were estimated previously from the approach da
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=0.8\textwidth]{figures/cost_function_hearing_problems.png}
-        \caption{Hearing problems detected}
+        \caption{With hearing problems\\ / low communication quality}
         \label{fig:state_res_distance_2}
     \end{subfigure}
     \caption{State representation (distance)}
@@ -1318,15 +1316,15 @@ In Figure \ref{fig:cost_function_1}, we show an approach to the interaction targ
     \includegraphics[width=0.6\textwidth]{figures/colour_bar.png}
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{figures/cost_function_1.png}
-        \caption{pre-Approach}
+        \caption{Initial position}
         \label{fig:cost_function_1}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{figures/cost_function_2.png}
-        \caption{Approach finished}
+        \caption{Final position after the approach}
         \label{fig:cost_function_2}
     \end{subfigure}   
-    \caption{Social cost based on distance from interaction target}
+    \caption{One of the recorded approaches to the interaction target while the target was controlled by an expert. The identified distance space partitions are overlayed on the interaction target. The expert tended to position the robot in the zone identified as the ``social'' proxemic space of the interaction target (yellow).}
     \label{fig:cost_function}
 \end{figure}
 
@@ -1336,28 +1334,26 @@ In Figure \ref{fig:cost_function_1}, we show an approach to the interaction targ
 \subsection{Group conversations}
 \label{sec:group conversations}
 
-The consortium partners at UT have also conducted an experiment which focused on social positioning of the TERESA robot within group conversations. During this experiment, which is described in Deliverable 3.1 \cite{teresa_d3.1}, our partners focused on the studying proxemics through the theory of F-formations\cite{kendon1990conducting} (i.e. different spatial arrangements for persons during group conversations) for situations with multiple interaction targets. Our partners have granted us access to their datasets, consisting of robot trajectories and user scores collected during group conversation episodes. We have used this data to learn social cost functions for social conversation from the feedback given by the interaction targets.
+The consortium partners at UT have also conducted an experiment which focused on social positioning of the TERESA robot within group conversations. During this experiment, which is described in Deliverable 3.1 \cite{d3.1}, our partners focused on studying the proxemics in the social conversation task through the theory of F-formations\cite{kendon1990conducting} (i.e. different spatial arrangements for persons during group conversations) for situations with multiple interaction targets. Our partners have granted us access to their datasets, consisting of robot trajectories and user scores collected during group conversation episodes. We have used this data to learn social cost functions for social conversation from the feedback given by the interaction targets.
 
 \subsubsection{Results}
 \label{sec:group_result}
 \todo[inline]{Joao: This section had overall very little detail and I will need to push Richard to be more explicit. I did the best I could here but there is still quite a bit missing.}
 
-The full description of the experimental setup and protocol of the experiments performed by UT can be found in \cite{teresa_d3.1}. In summary, each experimental run consisted of three phases: an approach phase, during which the pilot drove the robot to a group of interaction targets; a conversation phase, during which the pilot maintained an interaction with the group; and a retreat phase. At the end of the experimental run, the users scored the quality of the interaction.
+The full description of the experimental setup and protocol of the experiments performed by UT can be found in \cite{d3.1}. In summary, each experimental run consisted of three phases: an approach phase, during which the pilot drove the robot to a group of interaction targets; a conversation phase, during which the pilot maintained an interaction with the group; and a retreat phase. At the end of the experimental run, the users scored the quality of the interaction on a $1-7$ numerical scale where $7$ represents an interaction that is completely socially acceptable, and $1$ a socially unacceptable interaction.
 
-As in the case with a single interaction target, we are also interested in obtaining an appropriate state space representation for group conversation scenarios. The theory of F-formations suggests that, in group conversations involving three or more persons, the participants tend to position themselves facing the geometric center of the convex hull of their formation \cite{kendon1990conducting}. This formation, for the social conversation task, is exemplified in Figure \ref{fig:F-formation_experiment}. Therefore, the distance and bearing of the robot with respect to the center of a group should be target variables to control during a group conversation task. The results of UT have shown that deviations in bearing, in particular, are significantly correlated with the score given by the users at the end of the interaction. However, these two variables may not be sufficient -- we must also consider the influence of the distance and bearing with respect to each participant as a potential source of social cost.
+As in the case with a single interaction target, we are also interested in obtaining an appropriate state space representation for group conversation scenarios. The theory of F-formations suggests that, in group conversations involving three or more persons, the participants tend to position themselves facing the geometric center of the convex hull of their formation \cite{kendon1990conducting}. This formation, for the social conversation task, is exemplified in Figure \ref{fig:F-formation_experiment}. This prior knowledge tells us that the distance and bearing of the robot with respect to the center of a group should be included in the target variables to control during a group conversation task. The results of UT have shown that deviations in bearing, in particular, are significantly correlated with the score given by the users at the end of the interaction. However, these two variables may not be sufficient -- we must also consider the possible influence of the distance and bearing with respect to each participant as a potential source of social cost.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.4\textwidth]{figures/o-space_twente_data.png}
-    \caption{F-formation during experiment (robot in red, participants in blue, green and yellow and the center of the group is denoted by a x)}
+    \caption{An example of the F-formation during group conversation experiments (robot in red, participants in blue, green and yellow and the center of the group is denoted by a cross).}
     	\label{fig:F-formation_experiment}
 \end{figure} 
 
 In order to determine whether or not we should include the distance and bearing with respect to each individual participant in our representation of the state space for the conversation task, we performed a statistical analysis of the influence of these variables on the resulting grade provided by each participant after the interaction task.
 
-More concretely, we first organized the data by grouping the scores provided by the participants into $6$ different classes, corresponding to $6$ possible bearing states (analogously to their definition in Section \ref{sec:defining_the_state-space}) according to the average bearing of the robot with respect to each subject during the conversation phase. This was possible since the pilot rarely moved the robot during the conversation phase, maintaining its bearing toward the center of the group at a relatively constant value. Our proccessed dataset then consists of sets of samples $U_i = \{u_{i,1},u_{i,2},\ldots,u_{i,N_i}\}$ with $i\in\{0,\ldots,5\}$, where each $u_{i,j}\in U_i$ represents a score in the range $\{1,\ldots,7\}$ given by one of the participants, given that the bearing state with respect to that participant was $b_i$.
-
-\todo[inline]{Joao: more detail needed here.. what are the possible bearing state values?}
+More concretely, we first organized the data by grouping the scores provided by the participants into $6$ different classes, corresponding to $6$ possible bearing states $b_0,\ldots,b_5$. Each state $b_i$ corresponds to an absolute deviation in bearing with respect to the center of the group of $i\times 10$ degrees (with state $b_5$ including all possible deviations greater than $50º$). The scores were split into each class according to the average bearing of the robot with respect to each subject during the conversation phase. This was possible since the pilot rarely moved the robot during the conversation phase, maintaining its bearing at a relatively constant value. Our proccessed dataset then consists of sets of samples $U_i = \{u_{i,1},u_{i,2},\ldots,u_{i,N_i}\}$ with $i\in\{0,\ldots,5\}$, where each $u_{i,j}\in U_i$ represents a score in the range $\{1,\ldots,7\}$ given by one of the participants, given that the bearing state with respect to that participant was $b_i$.
 
 We then tested the following null hypothesis:
 \begin{align*}
@@ -1365,7 +1361,7 @@ We then tested the following null hypothesis:
         & \text{ \textit{does not influence the distribution of scores.}}
 \end{align*}
 
-Due to the different sample sizes of each set $U_i$, and the non-normality of the distribution of scores in each class, we opted to use the Kruskal-Wallis for statistical significance. The result of this test based on hypothesis $H_0$ was $p = 0.14$, which suggests at that there isn't a statistically significant difference between the sample sets at least at a level of significance of $10\%$. This leads us to conclude that we do not need to represent the bearing state with respect to each individual participant in a group conversation scenario as part of our state variables for the respective control task.
+Due to the different sample sizes of each set $U_i$, and the non-normality of the distribution of scores in each class, we opted to use the Kruskal-Wallis for statistical significance. The result of this test based on hypothesis $H_0$ was $p = 0.14$, which suggests at that there isn't a statistically significant difference between the sample sets at least at a level of significance of $10\%$. This leads us to conclude that we do not need to represent the bearing state with respect to each individual participant in a group conversation scenario as part of our state variables for the respective control task. Our dataset and the resulting expected values for each class are represented in Figure \ref{fig:cumulative1}. This visual representation also makes it clear that the distribution of scores is relatively constant as a function of the individual bearing state.
 
 We furthermore attempted to demonstrate that the bearing state with respect to the group as a whole is indeed a relevant variable, and that the proposed discretization captures the influence of this variable on the scores provided by the participants. To achieve this, we re-organized the data so that each $u_{i,j}\in U_i$ now represents the score of a participant given that the bearing state \emph{with respect to the center of the group} was $b_i$. This allows us to test the hypothesis:
 \begin{align*}
@@ -1373,7 +1369,7 @@ We furthermore attempted to demonstrate that the bearing state with respect to t
         & \text{ \textit{does not influence the distribution of scores.}}
 \end{align*}
 
-The Kruskal-Wallis test based on this hypothesis results in $p = 1.36\mathrm{e}{-4}$, which means that this hypothesis is rejected even at a confidence level of $1\%$, and that the bearing relative to the center of the group, on our proposed discretization, does indeed make a difference in the grade given by the participants.
+The Kruskal-Wallis test based on this hypothesis results in $p = 1.36\mathrm{e}{-4}$, which means that this hypothesis is rejected even at a confidence level of $1\%$, and that the bearing relative to the center of the group, on our proposed discretization, does indeed make a difference in the grade given by the participants. The probability distribution over scores for each class in this case is represented in Figure \ref{fig:cumulative2}.
 %(25.058705342300826, 0.00013574376253141289)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1385,15 +1381,15 @@ The Kruskal-Wallis test based on this hypothesis results in $p = 1.36\mathrm{e}{
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{figures/grade_cumulative.png}
-        \caption{Method 1}
+        \caption{Individual bearing state}
         \label{fig:cumulative1}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{figures/grade_cumulative_COM.png}
-        \caption{Method 2 (COM)}
+        \caption{Group bearing state}
         \label{fig:cumulative2}
     \end{subfigure}
-    \caption{Cumulated probabilities over grades, where the expected value of the grade is denoted by a blue diamond}
+    \caption{Cumulated probabilities over grades as a function of the bearing state (\subref{fig:cumulative1}) of each individual participant and (\subref{fig:cumulative2}) with respect to the geometric center of the group. The probabilities are represented in grayscale, where a value of $1$ corresponds to white (the cumulative probability of score $7$ is always $1$), and a value of $0$ corresponds to black. The expected value of the grade for each class is denoted by a blue diamond.}
     \label{fig:cumulative_probs}
 \end{figure}
 
@@ -1401,19 +1397,21 @@ The Kruskal-Wallis test based on this hypothesis results in $p = 1.36\mathrm{e}{
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{figures/cost_twente_data.png}
-        \caption{Angular social cost}
+        \caption{Social cost vs. Individual bearing state}
         \label{fig:cost_twente_1}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{figures/cost_twente_data_COM.png}
-        \caption{Angular social cost on COM}
+        \caption{Social cost vs. Group bearing state}
         \label{fig:cost_twente_2}
     \end{subfigure}
-    \caption{Social cost based on Angular offset from the interaction targets}
+    \caption{Social cost based on bearing w.r.t. (\subref{fig:cost_twente_1}) each individual participant and (\subref{fig:cost_twente_2}) with respect to the geometric center of the group.}
     \label{fig:social_cost_function_twente}
 \end{figure}
 
-The cost is given by the likelihood of the state not receiving a perfect grade (i.e 7).
+Equipped with this result we have extracted a measure of social cost as a funtion of the bearing state with respect to the geometric center of the group, based on the probability of receiving an error-free score (score $7$) in each state. This function is represented in Figure \ref{fig:cost_twente_2}, and shows an almost linear increase in cost w.r.t. the deviation in bearing.\todo{Fitting a sigmoid here would also be good.}. As a final note, and as a way of further confirming that the individual bearing state of each participant is not a useful feature, we have also attempted to extract an analogous measure of cost as a function of this variable. The results are shown in Figure \ref{fig:cost_twente_2}, and show a \emph{decrease} in cost as the deviation in bearing increases (which would lead to incorrectly rewarding behaviors for having higher bearings).
+
+\todo[inline]{Joao: Will try to get Richard to do the same for the distance, which apparently he didn't consider.}
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
 \label{sec:conclusions}
