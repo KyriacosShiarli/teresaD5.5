@@ -103,17 +103,17 @@
 
 The TERESA project aims to develop methods that allow a robot to interact effectively with a dynamic social environment. Specifically, we aim to place a semi-autonomous telepresence robot in a day-care center, to allow accessible and seamless communication between its members and remote visitors such as friends and family.\\
 
- A significant aspect of the project is that cost functions directly related to the movement and behaviour of the robot such as navigation and body pose are partly learned from data instead of being hard-coded. To make this possible, a variety of resources is required such as perception modules, learning algorithms, and of course the data itself. \\
+ A significant aspect of the project is that cost functions directly related to the movement and behaviour of the robot such as navigation and body pose are partly learned from data instead of being hard-coded. To make this possible, a variety of resources is required such as perception modules, learning algorithms, and of course the data themselves. \\
 
-This deliverable is the describes the latest advancements 
+This deliverable describes the latest advancements 
 elements for the TERESA robot through human feedback, in compliance with the 
 Description of Work. It discusses:
 
 \begin{itemize}
   \item Learning Algorithms. These are the methods that allow us to associate data from different sensors with feedback from the experiment subjects, into a cost function. We describe the algorithms used and methods for choosing between different design decisions within each algorithm.
   \item Experimentation. We perform experiments with manually 
-controlled robots which in the involved subject thinks are autonomous. We describe 
-specific instances of such a method, both for social navigation and social conversation scenarions, where a 
+controlled robots in which the involved subject thinks are autonomous. We describe 
+specific instances of such a method, both for social navigation and social conversation scenario, where a 
   large amount of data and human feedback is collected and processed.
   \item Implementation. Using our methods, the collected data and existing algorithms we perform learning in real and simulated robot settings.
 \end{itemize}
@@ -131,7 +131,7 @@ The main contributors to this document are Kyriacos Shiarlis (UvA), Richard Pron
 
 The technical goal of TERESA is to develop technology that enables a semi-autonomous robot to behave in an acceptable way in social situations. However, it is very hard to determine explicitly what constitutes an “acceptable way” for a robot to behave. This statement acts as motivation in this project, which aims to overcome this difficulty through learning. Work Package 5, and hence this deliverable, is mainly concerned with this idea of learning the correct behaviour from various feedback signals. Specifically, the robot should be able to learn from examples of human controller and from implicit or explicit feedback from people controlling or interacting with the robot.
 
-An important method for teaching a robot a desired behaviour is Inverse Reinforcement Learning (IRL), which was described in detail in deliverable D 5.1. IRL uses data from succesful demonstrations of a task to learn an expert's underlying \emph{cost function}. This cost function is then used to determine the robots behaviour in new situations. This deliverable offers two contributions to IRL, with social robotics being a strong application focus.
+An important method for teaching a robot a desired behaviour is Inverse Reinforcement Learning (IRL) \cite{abbeel2004apprenticeship}, which was further described in detail in \cite{d5.1} . IRL uses data from succesful demonstrations of a task to learn an expert's underlying \emph{cost function}. This cost function is then used to determine the robots behaviour in new situations. This deliverable offers two contributions to IRL, with social robotics being a strong application focus.
 
 The first contribution is an algorithm we call inverse reinforcement learning from failure (IRLF) and is described in Section \ref{sec:irlf}. The method extends IRL, allowing it to learn from data of both succesful and \emph{failed} demonstrations of a task. Experiments on both simulated and real robot data demonstrate that IRLF converges faster and generalises better than methods that do not use this extra source of data, especially when few successful demonstrations are available. 
 
@@ -283,7 +283,7 @@ where $\widetilde{\mu}^{\mathcal{F}}_k$ is the empirical expectation of feature 
 	\begin{equation}
 		\quad\max\limits_{\pi,\alpha} H(\mathcal{A}^h||\mathcal{S}^h) + \sum^K_{k=1} \alpha_k.
 	\end{equation}
-However, this formulation is problematic because \eqref{eq:abs_inequality} is not a non-linear constraint. An attempt to linearise this constraint quickly becomes involved and much harder to interpret.
+However, this formulation is problematic because \eqref{eq:abs_inequality} is a non-linear constraint. An attempt to linearise this constraint quickly becomes involved and much harder to interpret.
 
 A relaxation of the above approach can be formulated by removing the extra constraint in \eqref{eq:abs_inequality} and instead adding to the objective the inner product of a parameter vector $\theta=\left[\theta_1~\ldots~\theta_k\right]^T$ and the difference in feature expectations, yielding the following objective function:
 	\begin{equation}
@@ -373,8 +373,8 @@ Setting \eqref{eq:update_failure1} to zero yields:
 \end{equation}
 %
 
-\noindent \eqref{eq:update_success} implies that $w^{\mathcal{D}}_k$ can be updated using gradient descent, since the value of $\mu^{\pi^*}_ k|_{\mathcal{D}}$ will change in the next iteration.
-The minimising solution for $w^{\mathcal{F}}_k$ is found analytically.
+\noindent Equation \eqref{eq:update_success} implies that $w^{\mathcal{D}}_k$ can be updated using gradient descent, since the value of $\mu^{\pi^*}_ k|_{\mathcal{D}}$ will change in the next iteration.
+The minimising solution for $w^{\mathcal{F}}_k$ is found analytically. Equation
 \eqref{eq:update_failure2} shows how IRLF pushes the apprentice away from the failed demonstrations.  If $\mu^{\pi^*}_k|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}}_k$ is positive, then $w^{\mathcal{F}}_k$ will also be positive.  Since $w^{\mathcal{F}}$ is part of the reward function, on the next iteration, this will encourage a new $\pi^*$ that increases $\mu^{\pi^*}_k|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}}_k$ further.  The reverse occurs when $w^{\mathcal{F}}$ is negative.
 
 A key characteristic of IRLF is that it also handles cases where the failed trajectories are only `partial' failures, i.e., when the failed trajectories are similar to the successful ones with respect to some features and dissimilar with respect to others.
@@ -432,19 +432,19 @@ Algorithm \ref{alg:lff} describes IRLF procedurally. First, we compute the empir
 
 To evaluate IRLF, we consider three domains. Two of these concern the task of navigating a mobile robot in a social environment, a key challenge problem in social robotics \cite{pacchierotti2006embodied}. Because social rules are difficult to quantify, IRL is well suited to this task \cite{henry2010learning,vasquez2014inverse}. We first consider learning in a simulated navigation domain and then repeat the process using data gathered from experiments on the TERESA robot.
 
- Our third domain is the \emph{Factory} problem, a well known decision-theoretic benchmark domain\cite{dearden1997abstraction}.
+ Our third domain is the \emph{Factory} problem, a well known decision-theoretic benchmark domain \cite{dearden1997abstraction}.
  We compare IRLF to the original \emph{maximum casual entropy IRL} \cite{ziebart2008maximum}, which we henceforth refer to simply as IRL. 
 %\vspace{-3mm}
 
 \subsubsection{Simulated Navigation Domain \label{sec:sim_nav}}
 
 First, we consider a simulated navigation domain, shown in Figure \ref{fig:gridworld}, in which a robot (blue) navigates its environment to reach a target (red) while avoiding a moving
-obstacle (green). The state space contains all possible combined $(x,y)$ positions of the obstacle and the robot as well as five possible orientations for the obstacle, with one of them being stopped. The action space is $\mathcal{A} = \{up,down,left,right,stay\}$. Binary state features are computed by discretising the displacement between the $(x,y)$ coordinates of the robot to both the obstacle and the target into five possible values for each of the four dimensions, yielding a complete feature vector $\phi(s)\in\mathbb \{0,1\}^{20}$ for any $s\in\mathcal{S}$. The transition model for this world is deterministic. The action chosen by the robot results in the agent moving to that direction with probability 1. The moving obstacle maintains its initial orientation throughout the episode. When the obstacle moves beyond the edge of the grid, it reappears on the opposite side, while the robot remains in the same cell until a valid action is chosen.
+obstacle (green). The state space contains all possible combined $(x,y)$ positions of the obstacle and the robot as well as five possible movement orientations for the obstacle (up, down, left, right, stopped). The action space is $\mathcal{A} = \{up,down,left,right,stay\}$. Binary state features are computed by discretising the displacement between the $(x,y)$ coordinates of the robot to both the obstacle and the target into five possible values for each of the four dimensions, yielding a complete feature vector $\phi(s)\in\mathbb \{0,1\}^{20}$ for any $s\in\mathcal{S}$. The transition model for this world is deterministic. The action chosen by the robot results in the agent moving to that direction with probability 1. The moving obstacle maintains its initial orientation throughout the episode. When the obstacle moves beyond the edge of the grid, it reappears on the opposite side, while the robot remains in the same cell until a valid action is chosen.
 
 \begin{figure}
 \centering
 %\vspace{-3.3mm}
-    \includegraphics[width=0.3\textwidth]{figures/gridworld.png}
+    \includegraphics[width=0.4\textwidth]{figures/gridworld.png}
 %\vspace{-4mm}
   \caption{Simulated social navigation task.} \label{fig:gridworld}
 \end{figure}
@@ -656,7 +656,7 @@ Figure \ref{fig:factory_results} shows the results, which are consistent with ou
 
 \subsubsection{Real Navigation Domain}
 
-We also evaluate the performance of IRLF on the social navigation dataset gathered in collaboration with UPO in Seville, and described in Section 4 of Deliverable D 5.1. The collected dataset consists of 47 trajectories of an expert navigating the robot towards an interaction target while avoiding a moving or standing  person in a socially appropriate way. The positions of the people and the robot were accurately recorded using a motion capture system covering an area of $5m \times 5m$. A sample of the collected trajectories are shown in Figure \ref{fig:data}. 
+We also evaluate the performance of IRLF on the social navigation dataset gathered in collaboration with UPO in Seville, and described in Section 4 \cite{d5.1}. The collected dataset consists of 47 trajectories of an expert navigating the robot towards an interaction target while avoiding a moving or standing  person in a socially appropriate way. The positions of the people and the robot were accurately recorded using a motion capture system covering an area of $5m \times 5m$. A sample of the collected trajectories are shown in Figure \ref{fig:data}. 
 
 For safety reasons, the failed dataset $\mathcal{F}$, which consists of $59$ trajectories, was collected by driving the robot in a simulator in a way that intentionally violates social norms, e.g., running into, following, or standing next to people. 
 
@@ -694,7 +694,7 @@ Overall, the consistency of these results with those of the simulated domain pro
         \hspace{1mm}
     \includegraphics[scale = 0.35]{figures/bp.pdf}
   	\end{subfigure}
-  \caption{Sample trajectories from $w^{\mathcal{D}^*}$ (top) and $w^{\mathcal{F}^*}$ (bottom). Darker dots occur later in time.} %These reward functions were learned from real data. The alpha channel denotes time}}
+  \caption{Sample trajectories from $w^{\mathcal{D}^*}$ (left) and $w^{\mathcal{F}^*}$ (right). Darker dots occur later in time.} %These reward functions were learned from real data. The alpha channel denotes time}}
   \label{fig:paths}
 \end{figure}
 
@@ -1001,7 +1001,7 @@ In this section, we experimentally compare RLT$^*$ to the original MMP algorithm
 \subsubsection{Setting}
 	Our experiments take place in a randomly generated social environment, shown in Figure \ref{fig:exp_setting}. Every arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea on how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task of the robot is to, using $D$, extract a cost function based on different features of the environment, which in turn would allow it to behave socially in future tasks. These simulated settings are similar to the ones enountered by the TERESA robot during normal operation. Furthermore these simulations utilise a faithful Gazebo \footnote{www.gazebosim.org} model of the TERESA robot.
 
-	The features involved in our experiments include three Gaussian functions of different means and diagonal covariances around each person, three different functions that measure distance from the goal and a feature that measures proximity to obstacles. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}.
+  The features involved in our experiments can be divided in three sets. The first set encodes proxemics to the people present in the scene. These are represented by three Gaussian functions of different means and diagonal covariances around each person. The second set of features encodes the distance from the target location using linear, exponential and logarithmic functions. The third set encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modeling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
 
 
 	\begin{figure}[tbh]
@@ -1041,7 +1041,7 @@ In this section, we experimentally compare RLT$^*$ to the original MMP algorithm
 	\end{equation}
 which is our primary performance metric.  Note that, if the demonstration path $\zeta_i$ is optimal under $\mathbf{w}$, then $Q(\zeta,\zeta_i,\mathbf{w})>=0$.
 
-For our experiments, the ground-truth weights $\mathbf{w}_{gt}$ were chosen mainly induce a cost function that penalises passing in front of people. In addition, small weights were added to the other two Gaussian functions for each each individual person, as well as both linear and exponential penalisation of the distance from the goal, so that the resulting cost function, shown in Figure \ref{fig:cost_f}, would not be too trivial. 
+For our experiments, the ground-truth weights $\mathbf{w}_{gt}$ were chosen to induce a cost function that penalises passing in front of people. In addition, small weights were added to the other two Gaussian functions for each each individual person, as well as both linear and exponential penalisation of the distance from the goal, so that the resulting cost function, shown in Figure \ref{fig:cost_f}, would not be too trivial. 
 
 We also measure the time per iteration of each learning algorithm.  All algorithms were implemented in Python, share similar functions, and were not optimised for speed apart from the caching scheme in RLT$^*$.
 
@@ -1096,7 +1096,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 	Learning (s) & 275.2      & 3140.6       & 1808  & 911.7       \\ \hline
 	$Q(\zeta,\zeta_i,\mathbf{w}_{gt})$ & 7.28      & 3.14       & 0.57  & 1.57       \\ \hline
 	\end{tabular}}
-	\caption{Per iteration and total learning times for our proposed algorithms and the baselines (RLT$^*$-NC is RLT$^*$ without caching.)}
+	\caption{Per iteration and total learning times for our proposed algorithms and the baselines (RLT$^*$-NC is RLT$^*$ without caching.). Values in parentheses denote standard deviation.}
 	\label{tab:time}
 	\end{table}
 
@@ -1146,7 +1146,7 @@ In this section, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which l
 
 The task of engaging in social conversation through the TERESA robot has different control objectives and is subject to different social constraints than the task of social navigation. Therefore, the cost functions that will be used within the autonomous social conversation behaviors of the robot must be learned separately from those of social navigation.
 
-As discussed in the previous Deliverable 5.1\todo{cite}, there are multiple sources of feedback from which some measure of the social adequacy of the behaviors of the robot may potentially be inferred. Namely:
+As discussed in \cite{d5.1}, there are multiple sources of feedback from which some measure of the social adequacy of the behaviors of the robot may potentially be inferred. Namely:
 \begin{itemize}
 \item The reactions of the telepresent visitor\footnote{We here use the same terminology for the conversation task as in previous deliverables. Namely, the ``visitor'' is the person using the robot remotely; and the ``interaction targets'' are any persons which are physically co-present with the robot and engaged in the conversation.};
 \item The reactions of the interaction targets engaged in conversation with the visitor through the robot;
@@ -1157,7 +1157,7 @@ In this section, we describe our progress of learning social cost functions for 
 
 Our main contributions in this topic can be summarized as follows:
 \begin{itemize}
-\item In Section \ref{sec:initial_experiment}, we describe local experiments that were performed at the University of Amsterdam for a conversation scenario with the TERESA robot in various conditions, where we recorded explicit negative feedback from the visitor. This data was used to extract a measure of social cost related to proxemics form the perspective of the visitor. This cost function based on explicit feedback complements the cost functions that we had described in Deliverable 5.1 that were based on implicit feedback from the visitor;
+\item In Section \ref{sec:initial_experiment}, we describe local experiments that were performed at the University of Amsterdam for a conversation scenario with the TERESA robot in various conditions, where we recorded explicit negative feedback from the visitor. This data was used to extract a measure of social cost related to proxemics form the perspective of the visitor. This cost function based on explicit feedback complements the cost functions that we had described in \cite{d5.1} that were based on implicit feedback from the visitor;
 \item In Section \ref{sec:group conversations}, we present an analysis of the data that was collected by the TERESA consortium partners at the University of Twente (UT), through the experimental process described in Deliverable 3.1. We processed this data and extracted from it a measure of social cost related to proxemics from the explicit qualitative feedback provided by the participants of that study.
 \end{itemize}
 
@@ -1415,13 +1415,13 @@ Equipped with this result we have extracted a measure of social cost as a funtio
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
 \label{sec:conclusions}
-This deliverable has summarised our progress for Work Package 5 from month 15 of the project until month 30. Significant progress has been achieved in all aspect of social behaviour learning on the TERESA robot. 
+This deliverable has summarised our progress for Work Package 5 from month 15 of the project until month 30. Significant progress has been achieved in all aspects of social behaviour learning on the TERESA robot. 
 
- An important aspect of this progress is in terms of learning from human demonstrations, using IRL. Firstly we have enabled the robot to learn from failed demosntrations as well as succesful ones in a unified principled framework. We have demonstrated that our method is capable of utilising the failed demonstrations in conjunction with the succesful ones to learn faster and better. Secondly we have made developed a novel IRL method called, RLT$^*$ that works with RRT$^*$ as the underlying planner. RRT's are at the heart of TERESA's path planning module, thus learning directly using this planners is bound to produce superior learning results. We have also shown that our method is faster and better that a similar method that uses deterministic planners. A clear avenue of future work is to deploy RLT$^*$ on the real system. Furthermore we plan to integrate these methods together and evaluate any improvement on the real system.
+ An important aspect of this progress is in terms of learning from human demonstrations, using IRL. Firstly we have enabled the robot to learn from failed demosntrations as well as succesful ones in a unified principled framework. We have demonstrated that our method is capable of utilising the failed demonstrations in conjunction with the succesful ones to learn faster and better. Secondly we have developed a novel IRL method called, RLT$^*$ that works with RRT$^*$ as the underlying planner. RRT's are at the heart of TERESA's path planning module, thus learning directly using this planners is bound to produce superior learning results. We have also shown that our method is faster and better that a similar method that uses deterministic planners. A clear avenue of future work is to deploy RLT$^*$ on the real system. Furthermore we plan to integrate these methods together and evaluate any improvement on the real system.
 
- We have also reported significant progress in terms of experimentation and implementation of social conversation policies. Specifically, we conducted experiments and performed the necessary analysis, in order to discover a cost function for the distance between the robot and the interaction target. In addition we performed statistical analysis on an existing dataset gathered by our partners at UT. This dataset consisted of groups of people scoring how well the TERESA robot approached them. This analysis allowed us to produce a second cost function that determines how the robot should be orientated in such situations. The analysis also concluded that the bearing of the robot to the group's COM was far more important to the bearing with respect to an individual person. This allowed us to determine a compact yet representative state-space representation for the robot during conversation. 
+ We have also reported significant progress in terms of experimentation and implementation of social conversation policies. Specifically, we conducted experiments and performed the necessary analysis, in order to discover a cost function for the distance between the robot and the interaction target. In addition we performed statistical analysis on an existing dataset gathered by our partners at UT. This dataset consisted of groups of people scoring how well the TERESA robot approached them. This analysis allowed us to produce a second cost function that determines how the robot should be orientated in such situations. The analysis also concluded that the bearing of the robot to the group's centre of mass was far more important to the bearing with respect to an individual person. This allowed us to determine a compact yet representative state-space representation for the robot during conversation. 
 
- In terms of social conversation, there are two directions of future work we are currently pursuing and for which we plan to report in month 36. Firstly we aim for integrate these cost functions in order to learn a single social conversation policy under which the robot operates \todo{Diederik}. Secondly we aim to make the resulting policy more robust to false positives from the robots social detectors using advances filtering techniques such as partially observable Markov decision processes (POMDPS) and long-short memory networks (LSTM).
+ In terms of social conversation, there are two directions of future work we are currently pursuing and for which we plan to report in month 36. Firstly we aim to integrate these cost functions in order to learn a single social conversation policy under which the robot operates \todo{Diederik}. Secondly we aim to make the resulting policy more robust to false positives from the robots social detectors using advances filtering techniques such as partially observable Markov decision processes (POMDPs) and long-short memory networks (LSTMs).
 
 
 
