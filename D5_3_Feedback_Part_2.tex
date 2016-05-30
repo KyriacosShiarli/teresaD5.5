@@ -73,7 +73,7 @@
         \hline
         \rowcolor{gray!50}
         Date and Version Number & Author & Comments\\ \hline
-        22.07.2015 v0.1 & Jo\~ao Messias \&\hfill Kyriacos Shiarlis & Initial Verson.\\ \hline
+        31.05.2016 v1.0 & Jo\~ao Messias \&\hfill Kyriacos Shiarlis & Initial Verson.\\ \hline
 \end{tabular}
 
 \end{documentinfo}
@@ -123,7 +123,7 @@ ways their respective performance can be improved in the future.
 
 \section{Contributors}\label{sec:cont}
 
-The main contributors to this document are Kyriacos Shiarlis (UvA), Richard Pronk (UvA), Jo\~{a}o Messias (UvA) and Shimon Whiteson (UOXF). The document was reviewed by UPO\todo{fill in actual reviewers}.
+The main contributors to this document are Kyriacos Shiarlis (UvA), Richard Pronk (UvA), Jo\~{a}o Messias (UvA) and Shimon Whiteson (UOXF). The document was reviewed by Luis Merino and Jes\'{u}s Capit\'{a}n (UPO).
 
 \newpage
 
@@ -142,7 +142,7 @@ A social telepresence robot, must not only be capable of navigating to a target 
 \section{Inverse Reinforcement Learning from Failure}
 \label{sec:irlf}
 
-In IRL \cite{ng2000algorithms}, an \emph{apprentice} aims to learn a policy for acting in an environment, typically modelled as a \emph{Markov decision process} (MDP), for which the reward function is not available, but successful demonstrations provided by an \emph{expert} performing the task are given instead. An IRL algorithm tries to find a reward function that leads the apprentice to behave  similarly to the expert while generalising well to situations for which expert data is not available. Social robotic behaviour is an excellent example of an application where a behaviour can be easily demonstrated, but not easily coded. Therefore, any progress in IRL is bound to greatly benefit the applications which we are considering in the TERESA project.
+In IRL \cite{ng2000algorithms}, an \emph{apprentice} aims to learn a policy for acting in an environment, typically modelled as a \emph{Markov decision process} (MDP), for which the reward function is not available, but successful demonstrations provided by an \emph{expert} performing the task are given instead. An IRL algorithm tries to find a reward function that leads the apprentice to behave  similarly to the expert while generalising well to situations for which expert data are not available. Social robotic behaviour is an excellent example of an application where a behaviour can be easily demonstrated, but not easily coded. Therefore, any progress in IRL is bound to greatly benefit the applications which we are considering in the TERESA project.
 
 %Numerous IRL methods have been developed, using structured prediction \cite{klein2012inverse,ratliff2006maximum}, Bayes\-ian inference \cite{ramachandran2007bayesian}, Gaussian processes \cite{levine2011nonlinear}, and decision trees \cite{ratliff2007boosting} to learn reward functions. IRL has been applied to many tasks, e.g., simulated car driving \cite{abbeel2004apprenticeship}, learning autonomous driving styles \cite{kuderer2015learning} and socially appropriate navigation \cite{henry2010learning,vasquez2014inverse}. 
 
@@ -170,7 +170,7 @@ Optimally solving an MDP involves finding a policy $\pi:\mathcal{S}\times\mathca
  V^\pi(s) \coloneqq E\{\sum_{t = 1}^hR(s_t,a_t)\,\vert\, s_1 = s\}.
 \end{equation}
 
-Given data obtained from interacting with an MDP, RL methods seek a policy that maximises this expectation for a given reward function.  By contrast, given data obtained from \emph{expert} interactions with an MDP, IRL seeks the reward function that the expert was maximising.  IRL is useful in the many situations in which the expert cannot easily formalize her objectives as a reward function.  Instead, the \emph{learner}, an autonomous agent, can learn the reward function from the expert's behaviour and use it to imitate her.
+Given data obtained from interacting with an MDP, RL methods seek a policy that maximises this expectation for a given reward function.  By contrast, given data obtained from \emph{expert} interactions with an MDP, IRL seeks the reward function that the expert was maximising.  IRL is useful in the many situations in which the expert cannot easily formalize his or her own objectives as a reward function.  Instead, the \emph{learner}, an autonomous agent, can learn the reward function from the expert's behaviour and use it to imitate that behaviour.
 
 IRL is formalised as an `incomplete' MDP $\langle\mathcal{S},\mathcal{A},T\rangle$, also known as an MDP/R. Though initially unknown, the reward function is parametrised by $K$ \emph{feature functions}, $\phi_k(s,a)$:
 \begin{equation}
@@ -374,8 +374,7 @@ Setting \eqref{eq:update_failure1} to zero yields:
 %
 
 \noindent Equation \eqref{eq:update_success} implies that $w^{\mathcal{D}}_k$ can be updated using gradient descent, since the value of $\mu^{\pi^*}_ k|_{\mathcal{D}}$ will change in the next iteration.
-The minimising solution for $w^{\mathcal{F}}_k$ is found analytically. Equation
-\eqref{eq:update_failure2} shows how IRLF pushes the apprentice away from the failed demonstrations.  If $\mu^{\pi^*}_k|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}}_k$ is positive, then $w^{\mathcal{F}}_k$ will also be positive.  Since $w^{\mathcal{F}}$ is part of the reward function, on the next iteration, this will encourage a new $\pi^*$ that increases $\mu^{\pi^*}_k|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}}_k$ further.  The reverse occurs when $w^{\mathcal{F}}$ is negative.
+The minimising solution for $w^{\mathcal{F}}_k$ is found analytically. Equation~\eqref{eq:update_failure2} shows how IRLF pushes the apprentice away from the failed demonstrations.  If $\mu^{\pi^*}_k|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}}_k$ is positive, then $w^{\mathcal{F}}_k$ will also be positive.  Since $w^{\mathcal{F}}$ is part of the reward function, on the next iteration, this will encourage a new $\pi^*$ that increases $\mu^{\pi^*}_k|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}}_k$ further.  The reverse occurs when $w^{\mathcal{F}}$ is negative.
 
 A key characteristic of IRLF is that it also handles cases where the failed trajectories are only `partial' failures, i.e., when the failed trajectories are similar to the successful ones with respect to some features and dissimilar with respect to others.
 %
@@ -432,7 +431,7 @@ Algorithm \ref{alg:lff} describes IRLF procedurally. First, we compute the empir
 
 To evaluate IRLF, we consider three domains. Two of these concern the task of navigating a mobile robot in a social environment, a key challenge problem in social robotics \cite{pacchierotti2006embodied}. Because social rules are difficult to quantify, IRL is well suited to this task \cite{henry2010learning,vasquez2014inverse}. We first consider learning in a simulated navigation domain and then repeat the process using data gathered from experiments on the TERESA robot.
 
- Our third domain is the \emph{Factory} problem, a well known decision-theoretic benchmark domain \cite{dearden1997abstraction}.
+ Our third domain is the \emph{Factory} problem, a well known decision-theoretic benchmark domain~\cite{dearden1997abstraction}.
  We compare IRLF to the original \emph{maximum casual entropy IRL} \cite{ziebart2008maximum}, which we henceforth refer to simply as IRL. 
 %\vspace{-3mm}
 
@@ -498,7 +497,7 @@ and generate the respective feature expectations $\widetilde{\mu}^{\mathcal{D}_{
     % \includegraphics[clip=true,width=0.32\textwidth]{figures/taboo_apprentice_contrastive.pdf}
     % \includegraphics[clip=true,width=0.32\textwidth]{figures/expert_apprentice_complementary.pdf}
     % \includegraphics[clip=true,width=0.32\textwidth]{figures/taboo_apprentice_complementary.pdf}
-  \caption{Value over 60 iterations, for 20 runs in contrasting, complementary and overlapping simulated domains w.r.t. $w^{\mathcal{D}^*}$ and $w^{\mathcal{F}^*}$.}
+  \caption[Value over 60 iterations.]{Value over 60 iterations, for 20 runs in contrasting, complementary and overlapping simulated domains w.r.t. $w^{\mathcal{D}^*}$ and $w^{\mathcal{F}^*}$.}
   %\vspace{-3mm}
   \label{fig:complementary}
 
@@ -527,7 +526,7 @@ Figures \ref{fig:toy_expert_apprentice_overlapping} and \ref{fig:toy_taboo_appre
 
 Finally, Figures \ref{fig:toy_expert_apprentice_complementary} and \ref{fig:toy_taboo_apprentice_complementary} show similar results for the complementary scenario.  The IRLF methods again perform better in terms of $V^{\pi^*}_{\mathcal{D},test}$ but now also perform better in terms of $V^{\pi^*}_{\mathcal{F},test}$.  In fact, they outperform even the successful data in terms of $V^{\pi^*}_{\mathcal{F},test}$, a consequence of the complementary nature of the reward functions. 
 
-IRLF's performance with respect to $V^{\pi^*}_{\mathcal{F},test}$ (Figure \ref{fig:complementary} bottom row) illustrates how the algorithm gives priority to successful demonstrations when necessary. For the contrasting scenario, the probability of approaching the obstacle is already low for $w^{\mathcal{D}^*}$; therefore, IRL and IRLF behave similarly with respect to $w^{\mathcal{F}^*}$. In the ovelapping scenario, IRLF gives priority to reaching the target quickly, since this matches the behavior in the successful demonstrations (even though it is discouraged from doing so by the failed demonstrations). Doing so means accumulating more value in terms of $V^{\pi^*}_{\mathcal{F},test}$. In the complementary scenario, since it is possible to satisfy both objectives simultaneously (reaching the target and avoiding obstacles), IRLF finds a reward function that performs well with respect to the succesful demonstrations while at the same time having a lower value with respect to the failed demonstrations.
+IRLF's performance with respect to $V^{\pi^*}_{\mathcal{F},test}$ (Figure \ref{fig:complementary} bottom row) illustrates how the algorithm gives priority to successful demonstrations when necessary. For the contrasting scenario, the probability of approaching the obstacle is already low for $w^{\mathcal{D}^*}$; therefore, IRL and IRLF behave similarly with respect to $w^{\mathcal{F}^*}$. In the ovelapping scenario, IRLF gives priority to reaching the target quickly, since this matches the behaviour in the successful demonstrations (even though it is discouraged from doing so by the failed demonstrations). Doing so means accumulating more value in terms of $V^{\pi^*}_{\mathcal{F},test}$. In the complementary scenario, since it is possible to satisfy both objectives simultaneously (reaching the target and avoiding obstacles), IRLF finds a reward function that performs well with respect to the succesful demonstrations while at the same time having a lower value with respect to the failed demonstrations.
 
  In all scenarios, IRLF is more stable with incremental updates than without.  In the contrasting and complementary scenarios, IRLF with incremental updates learns more slowly, while in the overlapping scenario it learns faster initially but plateaus slightly lower.
 
@@ -538,7 +537,7 @@ To test this, we repeated our experiments in the constrasting scenario but with 
 \begin{figure}
 	\centering
  	\includegraphics[clip=true,width=0.55\textwidth]{figures/data_size.pdf}
- 	\caption{Performance of all three methods in the constrasting scenario for different numbers of initial states.}
+ 	\caption[Performance of all three methods in the constrasting scenario.]{Performance of all three methods in the constrasting scenario for different numbers of initial states.}
  	\label{fig:data_size}
 \end{figure}
 
@@ -579,7 +578,7 @@ To shed more light on IRLF's behaviour, Figure \ref{fig:rf_plot} plots the origi
     \label{fig:rf_plot_irlf}
   \end{subfigure}  
   %\vspace{-3mm}
-  \caption{The original reward and learned reward functions for the two algorithms. Obstacle is static at [2,2]\ }
+  \caption[The original reward and learned reward functions for the two algorithms.]{The original reward and learned reward functions for the two algorithms. Obstacle is static at [2,2]\ }
   %\vspace{-3mm}
   \label{fig:rf_plot}
 \end{figure*}
@@ -656,7 +655,7 @@ Figure \ref{fig:factory_results} shows the results, which are consistent with ou
 
 \subsubsection{Real Navigation Domain}
 
-We also evaluate the performance of IRLF on the social navigation dataset gathered in collaboration with UPO in Seville, and described in Section 4 \cite{d5.1}. The collected dataset consists of 47 trajectories of an expert navigating the robot towards an interaction target while avoiding a moving or standing  person in a socially appropriate way. The positions of the people and the robot were accurately recorded using a motion capture system covering an area of $5m \times 5m$. A sample of the collected trajectories are shown in Figure \ref{fig:data}. 
+We also evaluate the performance of IRLF on the social navigation dataset gathered in collaboration with UPO in Seville, and described in Section 4 of Deliverable 5.1 \cite{d5.1}. The collected dataset consists of 47 trajectories of an expert navigating the robot towards an interaction target while avoiding a moving or standing  person in a socially appropriate way. The positions of the people and the robot were accurately recorded using a motion capture system covering an area of $5m \times 5m$. A sample of the collected trajectories is shown in Figure \ref{fig:data}. 
 
 For safety reasons, the failed dataset $\mathcal{F}$, which consists of $59$ trajectories, was collected by driving the robot in a simulator in a way that intentionally violates social norms, e.g., running into, following, or standing next to people. 
 
@@ -665,7 +664,7 @@ For safety reasons, the failed dataset $\mathcal{F}$, which consists of $59$ tra
 %  \vspace{-2mm}
   \centering
     \includegraphics[width=0.55\columnwidth]{figures/data_plot.png}
-  \caption{A sample of trajectories gathered using the TERESA robot. Darker dots occur later in time.}
+  \caption[A sample of trajectories gathered using the TERESA robot.]{A sample of trajectories gathered using the TERESA robot. Darker dots occur later in time.}
   \label{fig:data}
 \end{figure}
 
@@ -751,7 +750,7 @@ To apply IRL to more realistic situations, researchers usually try to replace th
 
 Other approaches to the problem use hybrid planners. Inverse Optimal Heuristic Control \cite{ratliff2009inverse} models the long-term goals of the agent as a coarse state MDP, to ensure tractability, while using supervised learning to determine the local policy of the agent at each state. Graph-Based IOC \cite{byravan2015graph} uses discrete optimal control on a coarse graph and the actual path is executed using local trajectory optimisation techniques such as CHOMP \cite{ratliff2009chomp}, which would otherwise suffer from local minima. The method is effective in robotic manipulation tasks with many degrees of freedom.  However, these methods employ complex and domain-specific planning formulations that are not suitable for all robotics tasks. The method presented here employs widely used planners, making it versatile and easy to implement. 
 
-Another more recent graph-based concept is that of Adaptive State Graphs \cite{okallearning}, which build a controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn underlying cost function is not the same as the one used to execute the robot's behaviour. This can have adverse effect since an implicit assumption of IRL is that the demonstration paths came from the same planner that we use during learning. This planner has specific representations, such as discretisation and parameters such as the discount factor. If these change, different policies arise. As a result a path that was optimal under a certain planner ceases to be optimal under another.
+Another more recent graph-based concept is that of Adaptive State Graphs \cite{okallearning}, which build a controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn the underlying cost function is not the same as the one used to execute the robot's behaviour. This can have an adverse effect since an implicit assumption of IRL is that the demonstration paths came from the same planner that we use during learning. This planner has specific representations, such as discretisation and parameters such as the discount factor. If these change, different policies arise. As a result a path that was optimal under a certain planner ceases to be optimal under another.
 
 RLT$^*$ can also be viewed as a graph-based, or rather tree-based, approach. Instead of building a controller graph first and then using different controllers to optimise trajectories, RLT$^*$ builds a controller tree on the fly. RLT$^*$ however uses the exact same planner during learning and execution.
 
@@ -1022,7 +1021,7 @@ In this section, we experimentally compare RLT$^*$ to the original MMP algorithm
   \end{subfigure} 
 
   %\vspace{-3mm}
-  \caption{(a) An instance of the randomised social navigation task. Arrows denote the position and orientation of people in the scene. The robot is on the lefthand side of the map and the green box in the bottom right denotes the goal location. (b) The corresponding cost function for the random scenario. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
+  \caption[An instance of the randomised social navigation task, and its cost function.]{(a) An instance of the randomised social navigation task. Arrows denote the position and orientation of people in the scene. The robot is on the lefthand side of the map and the green box in the bottom right denotes the goal location. (b) The corresponding cost function for the random scenario. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
 
   %\vspace{-3mm}
   \label{fig:setting}
@@ -1079,7 +1078,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
   \end{subfigure} 
 
   %\vspace{-3mm}
-  \caption{Train and test set average cost difference, for 15 iterations. Error bars represent standard error over four independent runs on shuffled versions of the data. (RLT$^*$-NC is RLT$^*$ without caching.)}
+  \caption[Train and test set average cost difference, for 15 iterations.]{Train and test set average cost difference, for 15 iterations. Error bars represent standard error over four independent runs on shuffled versions of the data. (RLT$^*$-NC is RLT$^*$ without caching.)}
   %\vspace{-3mm}
   \label{fig:results}
 \end{figure}
@@ -1096,7 +1095,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 	Learning (s) & 275.2      & 3140.6       & 1808  & 911.7       \\ \hline
 	$Q(\zeta,\zeta_i,\mathbf{w}_{gt})$ & 7.28      & 3.14       & 0.57  & 1.57       \\ \hline
 	\end{tabular}}
-	\caption{Per iteration and total learning times for our proposed algorithms and the baselines (RLT$^*$-NC is RLT$^*$ without caching.). Values in parentheses denote standard deviation.}
+	\caption[Per iteration and total learning times.]{Per iteration and total learning times for our proposed algorithms and the baselines (RLT$^*$-NC is RLT$^*$ without caching.). Values in parentheses denote standard deviation.}
 	\label{tab:time}
 	\end{table}
 
@@ -1106,7 +1105,7 @@ The results show that both versions of RLT$^*$ always outperform both versions o
 	%\vspace{-3.3mm}
 	    \includegraphics[width=0.3\textwidth]{figures/path_compare.png}
 	%\vspace{-4mm}
-	  \caption{Qualitative comparison of paths. Goal is at the top left, robot begins on the bottom right. Black: demonstration path. Red: RLT$^*$. Green: MMP$_{0.8}$, Magenta: MMP$_{0.3}$ }
+	  \caption[Qualitative comparison of paths.]{Qualitative comparison of paths. Goal is at the top left, robot begins on the bottom right. Black: demonstration path. Red: RLT$^*$. Green: MMP$_{0.8}$, Magenta: MMP$_{0.3}$ }
 	  \label{fig:path_compare}
 	\end{figure}
 
@@ -1144,13 +1143,13 @@ In this section, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which l
 \section{Cost Functions for Social Conversation}
 \label{sec:cost_functions}
 
-The task of engaging in social conversation through the TERESA robot has different control objectives and is subject to different social constraints than the task of social navigation. Therefore, the cost functions that will be used within the autonomous social conversation behaviors of the robot must be learned separately from those of social navigation.
+The task of engaging in social conversation through the TERESA robot has different control objectives and is subject to different social constraints than the task of social navigation. Therefore, the cost functions that will be used within the autonomous social conversation behaviours of the robot must be learned separately from those of social navigation.
 
-As discussed in \cite{d5.1}, there are multiple sources of feedback from which some measure of the social adequacy of the behaviors of the robot may potentially be inferred. Namely:
+As discussed in Deliverable 5.1 \cite{d5.1}, there are multiple sources of feedback from which some measure of the social adequacy of the behaviours of the robot may potentially be inferred. Namely:
 \begin{itemize}
 \item The reactions of the telepresent visitor\footnote{We here use the same terminology for the conversation task as in previous deliverables. Namely, the ``visitor'' is the person using the robot remotely; and the ``interaction targets'' are any persons which are physically co-present with the robot and engaged in the conversation.};
 \item The reactions of the interaction targets engaged in conversation with the visitor through the robot;
-\item The demonstrations of social (and possibly asocial) behavior by human experts. 
+\item The demonstrations of social (and possibly asocial) behaviour by human experts. 
 \end{itemize}
 
 In this section, we describe our progress of learning social cost functions for social conversation through feedback that is provided from 1) the visitor and 2) the interaction targets. Learning social cost functions for social conversation from expert demonstrations falls under the scope of the IRL methods described in Section \ref{sec:irlf}, which can also be applied in this context, and constitutes future work.
@@ -1158,13 +1157,13 @@ In this section, we describe our progress of learning social cost functions for 
 Our main contributions in this topic can be summarized as follows:
 \begin{itemize}
 \item In Section \ref{sec:initial_experiment}, we describe local experiments that were performed at the University of Amsterdam for a conversation scenario with the TERESA robot in various conditions, where we recorded explicit negative feedback from the visitor. This data was used to extract a measure of social cost related to proxemics form the perspective of the visitor. This cost function based on explicit feedback complements the cost functions that we had described in \cite{d5.1} that were based on implicit feedback from the visitor;
-\item In Section \ref{sec:group conversations}, we present an analysis of the data that was collected by the TERESA consortium partners at the University of Twente (UT), through the experimental process described in Deliverable 3.1. We processed this data and extracted from it a measure of social cost related to proxemics from the explicit qualitative feedback provided by the participants of that study.
+\item In Section \ref{sec:group conversations}, we present an analysis of the data that was collected by the TERESA consortium partners at the University of Twente (UT), through the experimental process described in Deliverable 3.1 \cite{d3.1}. We processed these data and extracted from them a measure of social cost related to proxemics from the explicit qualitative feedback provided by the participants of that study.
 \end{itemize}
 
 \subsection{Local Experiment on Social Conversation}
 \label{sec:initial_experiment}
 
-An experiment regarding social conversation with the TERESA robot was conducted at the University of Amsterdam, between <fill in dates>\todo{confirm the dates w/ Richard}. The purpose of this experiment was twofold: firstly, to record both implicit and explicit feedback of the visitor and an interaction target to the behavior of the robot under controlled conditions, so as to enable the learning of cost functions that are representative of the social acceptability of those behaviors; secondly, to determine an appropriate representation of the state space for a decision-theoretic representation of the control task during autonomous social conversation.
+An experiment regarding social conversation with the TERESA robot was conducted at the University of Amsterdam, between <fill in dates>\todo{confirm the dates w/ Richard}. The purpose of this experiment was twofold: firstly, to record both implicit and explicit feedback of the visitor and an interaction target to the behaviour of the robot under controlled conditions, so as to enable the learning of cost functions that are representative of the social acceptability of those behaviours; secondly, to determine an appropriate representation of the state space for a decision-theoretic representation of the control task during autonomous social conversation.
 
 \subsubsection{Experimental Setup and Procedure}
 
@@ -1186,9 +1185,9 @@ In terms of hardware, the experimental setup was distributed across five network
 \item An auxiliary computer relaying a feed from an overhead camera installed in the interaction room. The camera was used to give the expert a better overview of the room, and used for later validation of the data.
 \end{itemize}
 
-The visitor was asked to give explicit feedback, in the form of keyboard presses, whenever the robot performed behaviors which were socially unacceptable.
+The visitor was asked to give explicit feedback, in the form of keyboard presses, whenever the robot performed behaviours which were socially unacceptable.
 
-Each experimental run involved two subjects, and was split into three phases. In the first of these phases, we intended to study the reactions of the participants to approach/retreat behaviors by the robots, similarly to what had been performed in the inductive user study described in Deliverable 3.1, as well as to study the correlation between the range of operation of the robot (its distance to the interaction target) during conversation, and social acceptability. To achieve this, at regular intervals during the experiment, we alternatingly performed the following behaviors in random order:
+Each experimental run involved two subjects, and was split into three phases. In the first of these phases, we intended to study the reactions of the participants to approach/retreat behaviours by the robot, similarly to what had been performed in the inductive user study described in Deliverable 3.1 \cite{d3.1}, as well as to study the correlation between the range of operation of the robot (its distance to the interaction target) during conversation, and social acceptability. To achieve this, at regular intervals during the experiment, we alternatingly performed the following behaviours in random order:
 \begin{itemize}
 \item The robot moved closer or farther away from the interaction target, at the discretion of the expert. The expert was instructed to attempt to elicit reactions from the participants, and therefore explored a varied range of distances to the interaction target during conversation, both within as well as outside of the expected operational conditions for the TERESA robot. For instance, at times the expert moved the robot as close as possible to the interaction target without placing the subject in danger of collision; and also placed the robot as far as physically possible from the interaction target;
 \item The interaction target was asked to move to a distance with respect to the robot which he/she felt was:
@@ -1201,13 +1200,13 @@ Each experimental run involved two subjects, and was split into three phases. In
 
 The visitor and the interaction target were instructed to maintain a normal conversation throughout each experimental run, and were informed \emph{a priori} that, at the request of the experimenter, either the robot or the interaction target would need to move (but not both simultaneously).
 
-In the second phase of each experimental run, the visitor and interaction target continued the conversation while expert executed various behaviors at different levels of perceived social acceptability. Acceptable behaviours include maintaining the correct body pose and correctly changing the distance based on social cues (e.g. hearing problems); whereas unacceptable behaviours include suddenly turning away from or randomly changing the distance to the interaction target. In this phase we focused especially on eliciting explicit negative feedback from the visitor by changing the orientation of the robot during conversation.
+In the second phase of each experimental run, the visitor and interaction target continued the conversation while the expert executed various behaviours at different levels of perceived social acceptability. Acceptable behaviours include maintaining the correct body pose and correctly changing the distance based on social cues (e.g. hearing problems); whereas unacceptable behaviours include suddenly turning away from or randomly changing the distance to the interaction target. In this phase we focused especially on eliciting explicit negative feedback from the visitor by changing the orientation of the robot during conversation.
 
-The third and final phase of the experimental runs explored the influence of communication difficulties on proxemics. Communication problems can be prevalent in the elderly due hearing problems. To simulate such a situation, we introduced artificial background noise (i.e. sounds of a cafeteria) at various levels during the experiment, and repeated the approach/retreat conditions of the first phase. After these were performed, the interaction target was asked to sit down, while the expert was still free to change the distance of the robot. The rationale for this step was that, while sitting down, people may exhibit characteristic reactions to hearing difficulties which we intended to record (such as leaning forward, as it had been identified by UT in their own experiments).
+The third and final phase of the experimental runs explored the influence of communication difficulties on proxemics. Communication problems can be prevalent in the elderly due to hearing problems. To simulate such a situation, we introduced artificial background noise (i.e. sounds of a cafeteria) at various levels during the experiment, and repeated the approach/retreat conditions of the first phase. After these were performed, the interaction target was asked to sit down, while the expert was still free to change the distance of the robot. The rationale for this step was that, while sitting down, people may exhibit characteristic reactions to hearing difficulties which we intended to record (such as leaning forward, as it had been identified by UT in their own experiments).
 
 The visitor and interaction target were then asked to switch places. Therefore, we performed two experimental runs for each pair of subjects. At the end of the two experimental runs, an interview was conducted with the subjects to obtain some additional insight on the behaviour of the robot.
 
-In total, $12$ \todo{Richard, is this correct?} subjects were involved in our local experiments, which consisted of a mix of student and faculty voluteers.
+In total, $12$ subjects were involved in our local experiments, which consisted of a mix of student and faculty voluteers.
 
 \todo[inline]{Joao: I'd like to have a link to a video of the experiments.}
 
@@ -1217,34 +1216,31 @@ In total, $12$ \todo{Richard, is this correct?} subjects were involved in our lo
 {\bf A Common Representation of the State Space for Autonomous Social Conversation}
 \label{sec:defining_the_state-space}
 
-In the previous deliverable in this Work Package (Deliverable 5.2 \cite{d5.2}), we have discussed in detail the relevant control variables for the TERESA social conversation task, and proposed a set of high-level actions for this task. Notably, we have concluded that most of the actions involved in social conversation require controlling the relative distance and bearing between the robot and one or more interaction targets, through the linear and angular velocity of the base of the robot. This conclusion was supported by the inductive user study conducted by UT, which demonstrated that the distance and bearing of the robot with respect to the interaction targets are both variables of interest in order to maintain social acceptability. 
+In the previous deliverable in this Work Package (Deliverable 5.2 \cite{d5.2}), we have discussed in detail the relevant control variables for the TERESA social conversation task, and proposed a set of high-level actions for this task. Notably, we have concluded that most of the actions involved in social conversation require controlling the relative distance and bearing between the robot and one or more interaction targets, through the linear and angular velocity of the base of the robot. This conclusion was supported by the inductive user study conducted by UT in Deliverable 3.1 \cite{d3.1}, which demonstrated that the distance and bearing of the robot with respect to the interaction targets are both variables of interest in order to maintain social acceptability. 
 
-Naturally, the most useful representations of social cost functions in this conversation task should defined over the same variables which are to be controlled by the autonomous behaviors of the robot. Therefore, our aim is to obtain a representation of social cost as a function of distance and bearing w.r.t the interaction target(s), and potentially also the linear and angular velocity of the robot. These are inherently continuous physical variables. Specifically, given the position of the interaction target as $p_I = [x_I\,\,y_I]^T$ and of the robot $p_R = [x_R\,\,y_R]^T$ in some common fixed frame, we define \emph{distance} in the conversation task as $\rho = ||p_I - p_R||$ where $||\cdot||$ is the Euclidean norm, and \emph{bearing} as $\phi = \arctan \frac{y_I - y_R}{x_I - x_R} - \theta$, where $\theta\in(-\pi,\pi]$ is the orientation of the robot in the same fixed frame. We also take the linear and angular velocity of the robot to be $v = dp_R/dt$ and $w = d\theta/dt$ respectively.
+Naturally, the most useful representations of social cost functions in this conversation task should be defined over the same variables which are to be controlled by the autonomous behaviours of the robot. Therefore, our aim is to obtain a representation of social cost as a function of distance and bearing w.r.t the interaction target(s), and potentially also the linear and angular velocity of the robot. These are inherently continuous physical variables. Specifically, given the position of the interaction target as $p_I = [x_I\,\,y_I]^T$ and of the robot $p_R = [x_R\,\,y_R]^T$ in some common fixed frame, we define \emph{distance} in the conversation task as $\rho = ||p_I - p_R||$ where $||\cdot||$ is the Euclidean norm, and \emph{bearing} as $\phi = \arctan \frac{y_I - y_R}{x_I - x_R} - \theta$, where $\theta\in(-\pi,\pi]$ is the orientation of the robot in the same fixed frame. We also take the linear and angular velocity of the robot to be $v = dp_R/dt$ and $w = d\theta/dt$ respectively.
 
-However, we note that the control solutions that we intend to develop for the autonomous behaviors of the robot during social conversation are based on decision-theoretic concepts, and it is not straightforward to use continuous representations of states and actions in these frameworks, since that would make these approaches intractable. Therefore, it is useful to first identify a compact, discretized representation of the state and action spaces, and to represent our cost functions in the same domains.
+However, we note that the control solutions that we intend to develop for the autonomous behaviours of the robot during social conversation are based on decision-theoretic concepts, and it is not straightforward to use continuous representations of states and actions in these frameworks, since that would make these approaches intractable. Therefore, it is useful to first identify a compact, discretized representation of the state and action spaces, and to represent our cost functions in the same domains.
 
-The study of proxemics \cite{hall1966hidden} has identified a discrete set of distance intervals for different types of interaction between humans. These distances are defined as the \emph{personal}, \emph{social}, and \emph{public} proxemic zones. This lend support to the hypothesis that a similar discrete representation of the distance space would be a natural basis for the domain of this variable within the TERESA social conversation task. In doing so, however, it is important to test the hypothesis that the available results on proxemics are also applicable to the TERESA social conversation task -- that is, that the fact that the users are interacting through a robot does not noticeably influence their proxemic zones. Therefore, based on our experimental data, we first attempted to learn a discretized proxemics-based representation of the distance space.
+The study of proxemics \cite{hall1966hidden} has identified a discrete set of distance intervals for different types of interaction between humans. These distances are defined as the \emph{personal}, \emph{social}, and \emph{public} proxemic zones. This lends support to the hypothesis that a similar discrete representation of the distance space would be a natural basis for the domain of this variable within the TERESA social conversation task. In doing so, however, it is important to test the hypothesis that the available results on proxemics are also applicable to the TERESA social conversation task -- that is, that the fact that the users are interacting through a robot does not noticeably influence their proxemic zones. Therefore, based on our experimental data, we first attempted to learn a discretized proxemics-based representation of the distance space.
 
-During our experimental runs, we collected the distances between the robot and the interaction target, as measured by the robot's laser range-finder. For the purpose of state space identification, the relevant portion of this data concerns the segments of the experimental runs where we asked the subjects to approach the robot to what they considered to be the normal, minimum and maximum interaction distances. In particular, we extracted the set of final distances of the subjects after their approaches to the robot, as $R = \{\rho_1, \rho_2,\ldots,\rho_N\}$, in the scenarios where there were no hearing difficulties. We then ran $K-$means clustering \cite{hartigan1979algorithm} with $K=3$ on dataset $R$ to identify the centroids of these interaction distances. The centroids of the resulting clusters, based on 31 approaches, are as follows:
+During our experimental runs, we collected the distances between the robot and the interaction target, as measured by the robot's laser range-finder. For the purpose of state space identification, the relevant portion of this dataset concerns the segments of the experimental runs where we asked the subjects to approach the robot to what they considered to be the normal, minimum and maximum interaction distances. In particular, we extracted the set of final distances of the subjects after their approaches to the robot, as $R = \{\rho_1, \rho_2,\ldots,\rho_N\}$, in the scenarios where there were no hearing difficulties. We then ran $K-$means clustering \cite{hartigan1979algorithm} with $K=3$ on dataset $R$ to identify the centroids of these interaction distances. The centroids of the resulting clusters, based on 31 approaches, are as follows:
 \begin{align*}
 \rho_{close} = 0.71m,\quad \rho_{normal} = 1.16m,\quad \rho_{far} = 1.68m.
 \end{align*}
 
-\todo[inline]{Joao: Richard should run t-tests on this data to actually test the hypothesis that there is no influnce in using the robot, using the human proxemic values published in the sociology literature. If there is no influence we might as well use those, instead of the values reported here..}
-
-In the presence of background noise, the interaction targets approached the robot significantly closer than their normal approach distance.
-The distance at which the interaction targets approached the robot while there are hearing problems lies between their definition of close and normal distances. 
-
-\todo[inline]{Joao: Richard, we need the actual values...}
+Furthermore, let $\rho_{hprob}$ represent the average distance at which interaction targets approach the robot \emph{normally} under the presence of background noise, so that the robot was within their perceived social space. According to our data, we have that $\rho_{hprob}=0.93m$. In this case there was no significant difference in our data regarding the values for the personal and public proxemic zones.
 
 We then define the discrete \emph{distance state} of the robot during social conversation as $d\in\{d_{personal},d_{social},d_{public}\}$.
- Let $F_{\rho}:\{d_{personal},d_{social},d_{public}\}\rightarrow\{\rho_{close}, \rho_{normal}, \rho_{far}\}$ be a bijection where $F_\rho(d_{personal}) = \rho_{close}$,  $F_\rho(d_{social}) = \rho_{normal}$ and  $F_\rho(d_{public}) = \rho_{far}$. Then, during execution, the distance state of the robot can be as:
+ Let $F_{\rho}:\{d_{personal},d_{social},d_{public}\}\rightarrow\{\rho_{close}, \rho_{normal}, \rho_{far}\}$ be a bijection where $F_\rho(d_{personal}) = \rho_{close}$,  $F_\rho(d_{social}) = \rho_{normal}$ and  $F_\rho(d_{public}) = \rho_{far}$. Then, during execution, and in the absence of background noise, the distance state of the robot can be determined as:
  \begin{align*}
    \argmin\limits_{d\in\{d_{personal},d_{social},d_{public}\}} |\rho_t-F_\rho(d)|,
  \end{align*}
 where $\rho_t$ is the real-valued distance at time $t$.
 
-The bearing between the robot and the interaction target should also be discretized. However, contrarily to the distance, there are no known results in the study of proxemics that can inform our discretization. A straightforward solution would be to divide the full angular range into equally-sized intervals. This would however lead (depending on the size of these intervals) to either many states with high precision or a small amount of states with low precision. A better solution is to take into consideration the physical shape of the robot and the capabilities of its sensors. This suggest that the angular discretization in front of the robot should have a higher resolution, since 1) the sensors of the robot have a limited field-of-view and are are more accurate within that region and 2) the viewability of the screen of the robot is also limited. The social cost of standing beside or behind the robot should therefore not differ much, as the screen can not be viewed and makes teleconferencing impossible.
+In the presence of background noise, a similar mapping $F^{hprob}_{\rho}:\{d_{personal},d_{social},d_{public}\}\rightarrow\{\rho_{close}, \rho_{hprob}, \rho_{far}\}$ can be used. By selecting the appropriate interaction distance values depending on whether or not there is perceived background noise, the robot can move closer to the interaction targets if it is within their social proxemic range.
+
+The bearing between the robot and the interaction target should also be discretized. However, contrarily to the distance, there are no known results in the study of proxemics that can inform our discretization. A straightforward solution would be to divide the full angular range into equally-sized intervals. This would however lead (depending on the size of these intervals) to either many states with high precision or a small amount of states with low precision. A better solution is to take into consideration the physical shape of the robot and the capabilities of its sensors. This suggest that the angular discretization in front of the robot should have a higher resolution, since 1) the sensors of the robot have a limited field-of-view and are more accurate within that region and 2) the viewability of the screen of the robot is also limited. The social cost of standing beside or behind the robot should therefore not differ much, since the screen can not be viewed from those angles, making teleconferencing impossible.
 
 Based on this idea, we have divided the angular range in front of the robot into steps of 10 angular degrees in width up to $50º$. That is, let
 \begin{align*}
@@ -1256,21 +1252,19 @@ and $F_\phi:\{b_i\}_{i=1,\ldots,11}\rightarrow \Phi$ where $\{b_i\}_{i=1,\ldots,
 \end{align*}
 where $\phi_t$ is the bearing at time $t$, and $deg(\phi_t)=\phi_t\times\frac{180}{\pi}$.
 
-Another important fact regarding the bearing is that the robot is symmetric and the conversation task, \emph{a priori}, has no reason to favor one angular direction over the other. Therefore we assume that the social cost with should also be symmetric with respect to the bearing (i.e. the cost at the left of the robot should equal the cost at the right of the robot). This hypothesis is also proven in section \ref{sec:group_result} and leads to requiring less experimental data and removes possible biases during the experiments. During execution, however, the actions of the robot naturally should depend on the actual direction of the interaction target. In Figure \ref{fig:state_viz}, the different angular states are reperesented in grayscale, and this symmetry can also be seen.
+Another important fact regarding the bearing is that the robot is symmetric and the conversation task, \emph{a priori}, has no reason to favor one angular direction over the other. Therefore we assume that the social cost should also be symmetric with respect to the bearing (i.e. the cost at the left of the robot should equal the cost at the right of the robot). This hypothesis is also proven in Section \ref{sec:group_result} and leads to requiring less experimental data and removes possible biases during the experiments. During execution, however, the actions of the robot naturally should depend on the actual direction of the interaction target. In Figure \ref{fig:state_viz}, the different angular states are reperesented in grayscale, and this symmetry can also be seen.
 
 
 \begin{figure}
     \centering
     \includegraphics[width=0.4\textwidth]{figures/state_viz.png}
-    \caption{Representation of the bearing state. Darker shades of grey correspond to lower bearings. In this representation, the bearing states to the right and left of the robot are aliased. This is the representation that is used as a basis for the social cost w.r.t. the bearing. However, during execution, the robot should discriminate between these different directions.}
+    \caption[Representation of the bearing state.]{Representation of the bearing state. Darker shades of grey correspond to lower bearings. In this representation, the bearing states to the right and left of the robot are aliased. This is the representation that is used as a basis for the social cost w.r.t. the bearing. However, during execution, the robot should discriminate between these different directions.}
     	\label{fig:state_viz}
 \end{figure}
 
 {\bf Social Cost from Explicit Negative Feedback}
 
 During our local experiments, we collected a total of 65 instances of explicit negative feedback from the participants in the role of visitor, in the form of key presses. As each test subject provided a different total amount of explicit feedback (some participants were more reserved than others in their use of the feedback functionality), a normalization was applied to the amount of feedback provided by each user. In Figure \ref{fig:button_presses}, the normalized relative frequency of explicit feedback by the visitors is plotted against the states of the robot, as per the state space description described in the previous section. This representation makes it evident that there is a very sparse distribution of key presses over states. Since there is insufficient data to fairly estimate the frequency of negative feedback at each particular distance-bearing pair, this representation makes it seem (incorrectly) that higher bearing values would be associated with lower social cost, which is not only unintuitive, but also contradicts UT's original findings.
-
-\todo[inline]{Joao: This analysis is incomplete. We should at least account for the fact that each state was visited a different number of times. Also, we could then fit a smoother function on the data, e.g. through logistic regression (or using an NN to predict the value softly, which is essentially the same). I will discuss this w/ Richard to have it fixed ASAP.}
 
 However, when looking purely at the distribution of explicit feedback over distances (marginalizing out the influence of bearing), a clear distribution that our intuition also supports can be observed, which is represented in Figure \ref{fig:distance_cost}. Here we can see that, based on the explicit feedback, being at the distance which most users considered to be ``normal'' yield the lowest likelihood of receiving negative feedback.
 
@@ -1324,7 +1318,7 @@ In Figure \ref{fig:cost_function_1}, we show an approach to the interaction targ
         \caption{Final position after the approach}
         \label{fig:cost_function_2}
     \end{subfigure}   
-    \caption{One of the recorded approaches to the interaction target while the target was controlled by an expert. The identified distance space partitions are overlayed on the interaction target. The expert tended to position the robot in the zone identified as the ``social'' proxemic space of the interaction target (yellow).}
+    \caption[One of the recorded approaches to the interaction target.]{One of the recorded approaches to the interaction target while the robot was controlled by an expert. The identified distance space partitions are overlayed on the interaction target. The expert tended to position the robot in the zone identified as the ``social'' proxemic space of the interaction target (yellow).}
     \label{fig:cost_function}
 \end{figure}
 
@@ -1334,11 +1328,10 @@ In Figure \ref{fig:cost_function_1}, we show an approach to the interaction targ
 \subsection{Group conversations}
 \label{sec:group conversations}
 
-The consortium partners at UT have also conducted an experiment which focused on social positioning of the TERESA robot within group conversations. During this experiment, which is described in Deliverable 3.1 \cite{d3.1}, our partners focused on studying the proxemics in the social conversation task through the theory of F-formations\cite{kendon1990conducting} (i.e. different spatial arrangements for persons during group conversations) for situations with multiple interaction targets. Our partners have granted us access to their datasets, consisting of robot trajectories and user scores collected during group conversation episodes. We have used this data to learn social cost functions for social conversation from the feedback given by the interaction targets.
+The consortium partners at UT have also conducted an experiment which focused on social positioning of the TERESA robot within group conversations. During this experiment, which is described in Deliverable 3.1 \cite{d3.1}, our partners focused on studying the proxemics in the social conversation task through the theory of F-formations \cite{kendon1990conducting} (i.e. different spatial arrangements for persons during group conversations) for situations with multiple interaction targets. Our partners have granted us access to their datasets, consisting of robot trajectories and user scores collected during group conversation episodes. We have used this dataset to learn social cost functions for social conversation from the feedback given by the interaction targets.
 
 \subsubsection{Results}
 \label{sec:group_result}
-\todo[inline]{Joao: This section had overall very little detail and I will need to push Richard to be more explicit. I did the best I could here but there is still quite a bit missing.}
 
 The full description of the experimental setup and protocol of the experiments performed by UT can be found in \cite{d3.1}. In summary, each experimental run consisted of three phases: an approach phase, during which the pilot drove the robot to a group of interaction targets; a conversation phase, during which the pilot maintained an interaction with the group; and a retreat phase. At the end of the experimental run, the users scored the quality of the interaction on a $1-7$ numerical scale where $7$ represents an interaction that is completely socially acceptable, and $1$ a socially unacceptable interaction.
 
@@ -1347,7 +1340,7 @@ As in the case with a single interaction target, we are also interested in obtai
 \begin{figure}
     \centering
     \includegraphics[width=0.4\textwidth]{figures/o-space_twente_data.png}
-    \caption{An example of the F-formation during group conversation experiments (robot in red, participants in blue, green and yellow and the center of the group is denoted by a cross).}
+    \caption[An example of the F-formation during group conversation experiments.]{An example of the F-formation during group conversation experiments (robot in red, participants in blue, green and yellow and the center of the group is denoted by a cross).}
     	\label{fig:F-formation_experiment}
 \end{figure} 
 
@@ -1361,7 +1354,7 @@ We then tested the following null hypothesis:
         & \text{ \textit{does not influence the distribution of scores.}}
 \end{align*}
 
-Due to the different sample sizes of each set $U_i$, and the non-normality of the distribution of scores in each class, we opted to use the Kruskal-Wallis for statistical significance. The result of this test based on hypothesis $H_0$ was $p = 0.14$, which suggests at that there isn't a statistically significant difference between the sample sets at least at a level of significance of $10\%$. This leads us to conclude that we do not need to represent the bearing state with respect to each individual participant in a group conversation scenario as part of our state variables for the respective control task. Our dataset and the resulting expected values for each class are represented in Figure \ref{fig:cumulative1}. This visual representation also makes it clear that the distribution of scores is relatively constant as a function of the individual bearing state.
+Due to the different sample sizes of each set $U_i$, and the non-normality of the distribution of scores in each class, we opted to use the Kruskal-Wallis for statistical significance. The result of this test based on hypothesis $H_0$ was $p = 0.14$, which suggests that there is not a statistically significant difference between the sample sets at least at a level of significance of $10\%$. This leads us to conclude that we do not need to represent the bearing state with respect to each individual participant in a group conversation scenario as part of our state variables for the respective control task. Our dataset and the resulting expected values for each class are represented in Figure \ref{fig:cumulative1}. This visual representation also makes it clear that the distribution of scores is relatively constant as a function of the individual bearing state.
 
 We furthermore attempted to demonstrate that the bearing state with respect to the group as a whole is indeed a relevant variable, and that the proposed discretization captures the influence of this variable on the scores provided by the participants. To achieve this, we re-organized the data so that each $u_{i,j}\in U_i$ now represents the score of a participant given that the bearing state \emph{with respect to the center of the group} was $b_i$. This allows us to test the hypothesis:
 \begin{align*}
@@ -1389,7 +1382,7 @@ The Kruskal-Wallis test based on this hypothesis results in $p = 1.36\mathrm{e}{
         \caption{Group bearing state}
         \label{fig:cumulative2}
     \end{subfigure}
-    \caption{Cumulated probabilities over grades as a function of the bearing state (\subref{fig:cumulative1}) of each individual participant and (\subref{fig:cumulative2}) with respect to the geometric center of the group. The probabilities are represented in grayscale, where a value of $1$ corresponds to white (the cumulative probability of score $7$ is always $1$), and a value of $0$ corresponds to black. The expected value of the grade for each class is denoted by a blue diamond.}
+    \caption[Cumulated probabilities over grades as a function of the bearing state.]{Cumulated probabilities over grades as a function of the bearing state (\subref{fig:cumulative1}) of each individual participant and (\subref{fig:cumulative2}) with respect to the geometric center of the group. The probabilities are represented in grayscale, where a value of $1$ corresponds to white (the cumulative probability of score $7$ is always $1$), and a value of $0$ corresponds to black. The expected value of the grade for each class is denoted by a blue diamond.}
     \label{fig:cumulative_probs}
 \end{figure}
 
@@ -1405,13 +1398,11 @@ The Kruskal-Wallis test based on this hypothesis results in $p = 1.36\mathrm{e}{
         \caption{Social cost vs. Group bearing state}
         \label{fig:cost_twente_2}
     \end{subfigure}
-    \caption{Social cost based on bearing w.r.t. (\subref{fig:cost_twente_1}) each individual participant and (\subref{fig:cost_twente_2}) with respect to the geometric center of the group.}
+    \caption[Social cost based on bearing.]{Social cost based on bearing w.r.t. (\subref{fig:cost_twente_1}) each individual participant and (\subref{fig:cost_twente_2}) with respect to the geometric center of the group.}
     \label{fig:social_cost_function_twente}
 \end{figure}
 
-Equipped with this result we have extracted a measure of social cost as a funtion of the bearing state with respect to the geometric center of the group, based on the probability of receiving an error-free score (score $7$) in each state. This function is represented in Figure \ref{fig:cost_twente_2}, and shows an almost linear increase in cost w.r.t. the deviation in bearing.\todo{Fitting a sigmoid here would also be good.}. As a final note, and as a way of further confirming that the individual bearing state of each participant is not a useful feature, we have also attempted to extract an analogous measure of cost as a function of this variable. The results are shown in Figure \ref{fig:cost_twente_2}, and show a \emph{decrease} in cost as the deviation in bearing increases (which would lead to incorrectly rewarding behaviors for having higher bearings).
-
-\todo[inline]{Joao: Will try to get Richard to do the same for the distance, which apparently he didn't consider.}
+Equipped with this result we have extracted a measure of social cost as a funtion of the bearing state with respect to the geometric center of the group, based on the probability of receiving an error-free score (score $7$) in each state. This function is represented in Figure \ref{fig:cost_twente_2}, and shows an almost linear increase in cost w.r.t. the deviation in bearing. As a final note, and as a way of further confirming that the individual bearing state of each participant is not a useful feature, we have also attempted to extract an analogous measure of cost as a function of this variable. The results are shown in Figure \ref{fig:cost_twente_2}, and show a \emph{decrease} in cost as the deviation in bearing increases (which would lead to incorrectly rewarding behaviours for having higher bearings).
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
 \label{sec:conclusions}
@@ -1419,9 +1410,9 @@ This deliverable has summarised our progress for Work Package 5 from month 15 of
 
  An important aspect of this progress is in terms of learning from human demonstrations, using IRL. Firstly we have enabled the robot to learn from failed demosntrations as well as succesful ones in a unified principled framework. We have demonstrated that our method is capable of utilising the failed demonstrations in conjunction with the succesful ones to learn faster and better. Secondly we have developed a novel IRL method called, RLT$^*$ that works with RRT$^*$ as the underlying planner. RRT's are at the heart of TERESA's path planning module, thus learning directly using this planners is bound to produce superior learning results. We have also shown that our method is faster and better that a similar method that uses deterministic planners. A clear avenue of future work is to deploy RLT$^*$ on the real system. Furthermore we plan to integrate these methods together and evaluate any improvement on the real system.
 
- We have also reported significant progress in terms of experimentation and implementation of social conversation policies. Specifically, we conducted experiments and performed the necessary analysis, in order to discover a cost function for the distance between the robot and the interaction target. In addition we performed statistical analysis on an existing dataset gathered by our partners at UT. This dataset consisted of groups of people scoring how well the TERESA robot approached them. This analysis allowed us to produce a second cost function that determines how the robot should be orientated in such situations. The analysis also concluded that the bearing of the robot to the group's centre of mass was far more important to the bearing with respect to an individual person. This allowed us to determine a compact yet representative state-space representation for the robot during conversation. 
+ We have also reported significant progress in terms of experimentation and implementation of social conversation policies. Specifically, we conducted experiments and performed the necessary analysis, in order to discover a cost function for the distance between the robot and the interaction target. In addition we performed statistical analysis on an existing dataset gathered by our partners at UT. This dataset consisted of groups of people scoring how well the TERESA robot approached them. This analysis allowed us to produce a second cost function that determines how the robot should be orientated in such situations. The analysis also concluded that the bearing of the robot to the group's geometric centre was far more important to the bearing with respect to an individual person. This allowed us to determine a compact yet representative state-space representation for the robot during conversation. 
 
- In terms of social conversation, there are two directions of future work we are currently pursuing and for which we plan to report in month 36. Firstly we aim to integrate these cost functions in order to learn a single social conversation policy under which the robot operates \todo{Diederik}. Secondly we aim to make the resulting policy more robust to false positives from the robots social detectors using advances filtering techniques such as partially observable Markov decision processes (POMDPs) and long-short memory networks (LSTMs).
+ In terms of social conversation, there are two directions of future work we are currently pursuing and for which we plan to report in month 36. Firstly we aim to integrate these cost functions in order to learn a single social conversation policy under which the robot operates. Secondly we aim to make the resulting policy more robust to false positives from the robots social detectors using advances filtering techniques such as Partially Observable Markov Decision Processes (POMDPs) and Long-Short Memory Networks (LSTMs).
 
 
 
