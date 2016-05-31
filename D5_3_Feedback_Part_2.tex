@@ -735,7 +735,6 @@ Several researchers have proposed replacing the planning step in IRL with more c
 
 In path planning, Rapidly Exploring Random Trees (RRTs)~\cite{lavalle1998rapidly} are popular because they cope well with continuous and high-dimensional domains and can elegantly handle kinodynamic constraints. The RRT$^*$ algorithm \cite{karaman2011sampling}, which extends RRTs to incorporate a cost function, is especially effective. However, the cost functions used by RRT$^*$ are typically simple and hand-coded and, to our knowledge, no methods have been developed to learn RRT$^*$ cost functions from demonstrations.
 
-
 In this section, we propose Rapidly Exploring Learning Trees (RLT), which learns RRT$^*$ cost functions from demonstration. Specifically we modify Maximum Margin Planning to use RRT$^*$ as a planner. Furthermore, we propose a caching scheme that greatly reduces the computational cost of this approach. RLT requires no additional planner assumptions other than those inherent in RRT$^*$, making it particularly easy to implement. 
 
 We evaluate RLT on real and simulated data from a social navigation scenario. The results demonstrate that RLT achieves better performance at lower computational cost than methods that learn path planning cost functions for deterministic planners.
@@ -1152,7 +1151,7 @@ As discussed in Deliverable 5.1 \cite{d5.1}, there are multiple sources of feedb
 \item The demonstrations of social (and possibly asocial) behaviour by human experts. 
 \end{itemize}
 
-In this section, we describe our progress of learning social cost functions for social conversation through feedback that is provided from 1) the visitor and 2) the interaction targets. Learning social cost functions for social conversation from expert demonstrations falls under the scope of the IRL methods described in Section \ref{sec:irlf}, which can also be applied in this context, and constitutes future work.
+In this section, we describe our progress on the topic of learning social cost functions for social conversation through feedback that is provided from 1) the visitor and 2) the interaction targets, as a follow-up on the work that has been presented in Deliverable 5.1 \cite{d5.1}. There, we focused mostly on extracting a measure of social cost associated with the facial expressions of the visitor that were more significantly correlated with negative feedback. Here, we focus on obtaining social cost functions over a space of body pose states for the robot, which can then be used to inform the body pose control policies that are being developed also within Work Package 5.
 
 Our main contributions in this topic can be summarized as follows:
 \begin{itemize}
@@ -1163,7 +1162,9 @@ Our main contributions in this topic can be summarized as follows:
 \subsection{Local Experiment on Social Conversation}
 \label{sec:initial_experiment}
 
-An experiment regarding social conversation with the TERESA robot was conducted at the University of Amsterdam, between <fill in dates>\todo{confirm the dates w/ Richard}. The purpose of this experiment was twofold: firstly, to record both implicit and explicit feedback of the visitor and an interaction target to the behaviour of the robot under controlled conditions, so as to enable the learning of cost functions that are representative of the social acceptability of those behaviours; secondly, to determine an appropriate representation of the state space for a decision-theoretic representation of the control task during autonomous social conversation.
+An experiment regarding social conversation with the TERESA robot was conducted at the University of Amsterdam, between November 16 and December 7, 2016. The purpose of this experiment was twofold: firstly, to record both implicit and explicit feedback of the visitor and an interaction target to the behaviour of the robot under controlled conditions, so as to enable the learning of cost functions that are representative of the social acceptability of those behaviours; secondly, to determine an appropriate representation of the state space for a decision-theoretic representation of the control task during autonomous social conversation. 
+
+These local experiments provide us with data regarding explicit real-time feedback from the visitor alongside the low-level control inputs to the robot, which is fundamental in order for us to progress in our task of developing body pose control policies for the TERESA robot.
 
 \subsubsection{Experimental Setup and Procedure}
 
@@ -1206,9 +1207,7 @@ The third and final phase of the experimental runs explored the influence of com
 
 The visitor and interaction target were then asked to switch places. Therefore, we performed two experimental runs for each pair of subjects. At the end of the two experimental runs, an interview was conducted with the subjects to obtain some additional insight on the behaviour of the robot.
 
-In total, $12$ subjects were involved in our local experiments, which consisted of a mix of student and faculty voluteers.
-
-\todo[inline]{Joao: I'd like to have a link to a video of the experiments.}
+In total, $12$ subjects were involved in our local experiments, which consisted of a mix of student and faculty voluteers. A video of a part of one of our experiments can be found at: \url{https://staff.fnwi.uva.nl/j.v.teixeiradesousamessias/teresa_vids/local_experiments.ogv}. There, the data collected both from the camera facing the visitor and also from the onboard RGB/D camera on the robot are shown in real time. The alternating behavior of our approach scenarios is also showcased -- the visitor first approaches the robot, giving us data on the preferred range for interaction. Then, the robot approaches the person, either attempting to elicit feedback from the subjects, or by performing what the expert considers to be a ``socially acceptable'' interaction.
 
 \subsubsection{Results}
 \label{sec:social_results}
@@ -1328,7 +1327,7 @@ In Figure \ref{fig:cost_function_1}, we show an approach to the interaction targ
 \subsection{Group conversations}
 \label{sec:group conversations}
 
-The consortium partners at UT have also conducted an experiment which focused on social positioning of the TERESA robot within group conversations. During this experiment, which is described in Deliverable 3.1 \cite{d3.1}, our partners focused on studying the proxemics in the social conversation task through the theory of F-formations \cite{kendon1990conducting} (i.e. different spatial arrangements for persons during group conversations) for situations with multiple interaction targets. Our partners have granted us access to their datasets, consisting of robot trajectories and user scores collected during group conversation episodes. We have used this dataset to learn social cost functions for social conversation from the feedback given by the interaction targets.
+The consortium partners at UT have also conducted an experiment which focused on social positioning of the TERESA robot within group conversations. During this experiment, which is described in Deliverable 3.1 \cite{d3.1}, our partners focused on studying the proxemics in the social conversation task through the theory of F-formations \cite{kendon1990conducting} (i.e. different spatial arrangements for persons during group conversations) for situations with multiple interaction targets. Although these datasets do not contain real-time feedback from the participants, and therefore are more limited for the purposes of learning social cost functions for social conversation than those that were collected during the experiments performed locally at the UvA, they did include an \emph{a posteriori} evaluation of the quality of the interaction behaviors at the end of each episode. Our partners have granted us access to their datasets, consisting of robot trajectories and user scores collected after conversation episodes. We have used this dataset to learn social cost functions for social conversation from the \emph{a posteriori} feedback given by the interaction targets.
 
 \subsubsection{Results}
 \label{sec:group_result}
@@ -1412,10 +1411,7 @@ This deliverable has summarised our progress for Work Package 5 from month 15 of
 
  We have also reported significant progress in terms of experimentation and implementation of social conversation policies. Specifically, we conducted experiments and performed the necessary analysis, in order to discover a cost function for the distance between the robot and the interaction target. In addition we performed statistical analysis on an existing dataset gathered by our partners at UT. This dataset consisted of groups of people scoring how well the TERESA robot approached them. This analysis allowed us to produce a second cost function that determines how the robot should be orientated in such situations. The analysis also concluded that the bearing of the robot to the group's geometric centre was far more important to the bearing with respect to an individual person. This allowed us to determine a compact yet representative state-space representation for the robot during conversation. 
 
- In terms of social conversation, there are two directions of future work we are currently pursuing and for which we plan to report in month 36. Firstly we aim to integrate these cost functions in order to learn a single social conversation policy under which the robot operates. Secondly we aim to make the resulting policy more robust to false positives from the robots social detectors using advances filtering techniques such as Partially Observable Markov Decision Processes (POMDPs) and Long-Short Memory Networks (LSTMs).
-
-
-
+In terms of social conversation, there are three directions of future work we are currently pursuing, and for which we plan to report in month 36. Firstly, we aim to apply the methods for IRL that were here presented to the problem of learning social cost functions for social conversation from expert demonstrations of the interaction behaviors; Secondly, we aim to integrate the available cost functions in order to learn a single social conversation policy under which the robot operates. Finally, we aim to make the resulting policy more robust to false positives from the robots social detectors using advances filtering techniques such as \emph{partially observable Markov decision processes} (POMDPs) and \emph{long-short memory networks} (LSTMs).
 
 \bibliographystyle{plain}
 \bibliography{references}
