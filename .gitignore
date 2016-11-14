@@ -1,5 +1,6 @@
 *~
 _*
+*.fdb_latexmk
 *.blg
 *.aux
 /auto
@@ -12,7 +13,9 @@ _*
 *backup
 *-converted-to.*
 *.fmt
-D5_3_Feedback_Part_2.pdf
+D5_5Feedback.pdf
 *.lof
 *.toc
 *.lot
+*.gz
+*.fls
