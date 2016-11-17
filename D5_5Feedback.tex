@@ -565,10 +565,10 @@ In this section, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which l
 \section{Learning Body Pose Policies from Demonstration}
 \label{sec:sl_policy}
 
-Apart from being able to navigate socially, a key functionality for our semi-autonomous telepresence system, is to be able to allow the pilot to engage in conversation 
-with the people around the robot, without any input from the pilot himself. A key approach of TERESA is that a large part of this autonomous behaviour is learned from various form of human interaction. 
+Apart from being able to navigate socially, a key functionality for our semi-autonomous telepresence system, to allow the pilot to engage in conversation 
+with the people around the robot, without any input from the pilot himself. While in some ideal conditions this would be a simple tracking problem, it is no longer the case in real social environments. This is because firsly there could be significan sensor noise, not allowing the robot to track everyone in its surroundings. Secondly, in crowded environments social norms become harder to hard code. The TERESA system attempts to deal with these problems by learning from human interaction.
 
-In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robots behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. This deliverable describes the use of human demonstrations to directly learn body pose policies for the robot. This is split in three sections. 
+In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robots behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. This section describes the use of human demonstrations to directly learn body pose policies for the robot, and it is organised as follows. 
 
 \begin{itemize}
 	\item In Section \ref{sec:initial_experiment} we describe local experiments performed at the UvA. The aim of this experiments where to simulate different social situations and extract human demonstrations of control during robot conversation. We further describe how this data was filtered and processed.
@@ -583,12 +583,46 @@ The reasoning behind our approach is described in more detail in Deliverable 5.4
 The final round of local experiments at the University of Amsterdam took place in August 2016. Whilst previous local experiments had the aim of extracting direct human feedback, these were focused on collecting control data from human demonstrations at different social situations as well as data from all of the robot's sensors. Using machine learning, the aim was to match sequences of input data to the appropriate controls allowing the robot to thus mimic the human demonstrations in new unseen situations. The main aims of the experimental setup and procedure were:
 
 \begin{itemize}
-\item To
+\item To collect data of the robot interacting with various groups sizes.
+\item To collect data of expert demonstrations during these interactions. 
+\item To use the data in order to learn a mapping from robot observations to robot actions.
 \end{itemize}
 
 \subsubsection{Experimental Setup}
-The setup of this experiment is similar to the one used in the previous deliverable and is depicted in figure ??. The robot is placed along with four interaction targets into the "interaction room". Three of the interaction targets are volunteers and vary with each experimental session while one is a researcher from the project. The researcher also participates in the interaction but has the additional role of inducing different social situations such that sufficient variability in the data is ensured. For example the researcher would instruct people to leave or join the conversation group, instruct the group to move around or change in shape.  
+The setup of this experiment is similar to the one used in the previous deliverable and is depicted in figure ??. The robot is placed along with four interaction targets into the "interaction room". Three of the interaction targets are volunteers and vary with each experimental session while one is a researcher from the project. During the experimental session the interaction targets interact with the robot in a social manner. 
+
+The researcher also participates in the interaction but has the additional role of inducing different social situations such that sufficient variability in the data is ensured. This was done by instructing the volunteers to:
+
+\begin{itemize}
+ 	\item Leave or join the group.
+ 	\item Sit down or stand up.
+ 	\item Move
+ 	\item Change group formation.
+\end{itemize}
+ Meanwhile in the "control room" another researcher acts as an expert demonstrator, controling the TERESA robot and making sure that the interaction is socially appropriate. 
+
+The following was collected during our experiments:
+
+\begin{itemize}
+	\item Linear and angular velocity ($v,\omega$) commands, generated by the expert. 
+	\item Person positions  ($x,y$) as detected by the robot's on board localisation module.
+	\item Ground truth person positions ($x_{gt},y_{gt}$) using the Optitrack overhead tracking system.
+	\item Laser and RGBD sensor data.
+	\item Odometry.
+\end{itemize}
+
 \subsubsection{Processing}
+
+Before using a learning algorithm to learn a mapping from sensor observations to linear and angular velocities, the collected data was first be processed into an appropriate representation. 
+
+The first step in processing was removing parts where we would not expect the robot to learn a correct mapping for that situation. This occured for example in cases where the participants would quickly move away from the robot and in cases where unusuall circumstances took place, or times when the human expert would make an obvious mistake. This data filtering took place by playing bag the data and annotating frames where innapropriate data was present. 
+
+Next using the ground truth data from the Optitrack system we labeled which person was considered to be the interaction target during the conversation. This step is essential because during normal use of the TERESA system an interaction target also needs to be defined by the pilot. 
+
+Finally to enable learning a suitable representation for the state of the robot had to be deviced. The most important 
+
+
+
 \subsection{Algorithm and representation}
 
 \subsection{Results}
