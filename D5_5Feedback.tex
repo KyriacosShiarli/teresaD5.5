@@ -565,10 +565,10 @@ In this section, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which l
 \section{Learning Body Pose Policies from Demonstration}
 \label{sec:sl_policy}
 
-Apart from being able to navigate socially, a key functionality for our semi-autonomous telepresence system, to allow the pilot to engage in conversation 
-with the people around the robot, without any input from the pilot himself. While in some ideal conditions this would be a simple tracking problem, it is no longer the case in real social environments. This is because firsly there could be significan sensor noise, not allowing the robot to track everyone in its surroundings. Secondly, in crowded environments social norms become harder to hard code. The TERESA system attempts to deal with these problems by learning from human interaction.
+Apart from being able to navigate socially, a key functionality for our semi-autonomous telepresence system, is to allow the pilot to engage in conversation 
+with the people around the robot, without any input from the pilot himself. While in some ideal conditions this would be a simple tracking problem, it is no longer the case in real social environments. This is because firstly there could be significant sensor noise, not allowing the robot to track everyone in its surroundings. Secondly, in crowded environments social norms become harder to hard code. The TERESA system attempts to deal with these problems by learning from human interaction.
 
-In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robots behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. This section describes the use of human demonstrations to directly learn body pose policies for the robot, and it is organised as follows. 
+In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robots behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. In this deliverable we take a different approach. Instead of asking direct feedback from users we employ a human expert to demonstrate the correct behaviour to the robot. Using the collected demonstrations we learn a direct mapping from sensor readings to socially appropriate actions. The rest of the section is organised as follows. 
 
 \begin{itemize}
 	\item In Section \ref{sec:initial_experiment} we describe local experiments performed at the UvA. The aim of this experiments where to simulate different social situations and extract human demonstrations of control during robot conversation. We further describe how this data was filtered and processed.
@@ -580,16 +580,15 @@ The reasoning behind our approach is described in more detail in Deliverable 5.4
 
 \subsection{Local Experiments and demonstration collection}
 \label{sec:initial_experiment}
-The final round of local experiments at the University of Amsterdam took place in August 2016. Whilst previous local experiments had the aim of extracting direct human feedback, these were focused on collecting control data from human demonstrations at different social situations as well as data from all of the robot's sensors. Using machine learning, the aim was to match sequences of input data to the appropriate controls allowing the robot to thus mimic the human demonstrations in new unseen situations. The main aims of the experimental setup and procedure were:
+The fist step to achieving the goals set out in this section was to perform experiments in order to collect appropriate demonstration data in various social interaction situations. These experiments took place at the University of Amsterdam in August 2016. These were focused on collecting control data from human demonstrations at different social situations as well as data from all of the robot's sensors. Using machine learning, the aim was to match sequences of input data to the appropriate controls allowing the robot to thus mimic the human demonstrations in new unseen situations. The main aims of the experimental setup and procedure were:
 
 \begin{itemize}
 \item To collect data of the robot interacting with various groups sizes.
-\item To collect data of expert demonstrations during these interactions. 
-\item To use the data in order to learn a mapping from robot observations to robot actions.
+\item To impose siginificant variability in the sensor and demonstration data 
 \end{itemize}
 
 \subsubsection{Experimental Setup}
-The setup of this experiment is similar to the one used in the previous deliverable and is depicted in figure ??. The robot is placed along with four interaction targets into the "interaction room". Three of the interaction targets are volunteers and vary with each experimental session while one is a researcher from the project. During the experimental session the interaction targets interact with the robot in a social manner. 
+The setup of this experiment is similar to the one used in the previous deliverable and is depicted in figure ??. The TERESA robot is placed along with four interaction targets into the "interaction room". Three of the interaction targets are volunteers and vary with each experimental session while one is a researcher from the project. During the experimental session the interaction targets interact with the robot in a social manner. 
 
 The researcher also participates in the interaction but has the additional role of inducing different social situations such that sufficient variability in the data is ensured. This was done by instructing the volunteers to:
 
@@ -613,17 +612,59 @@ The following was collected during our experiments:
 
 \subsubsection{Processing}
 
-Before using a learning algorithm to learn a mapping from sensor observations to linear and angular velocities, the collected data was first be processed into an appropriate representation. 
+Before using a learning algorithm to learn a mapping from sensor observations to linear and angular velocities, the collected data was first filtered and processed into an appropriate representation. 
 
-The first step in processing was removing parts where we would not expect the robot to learn a correct mapping for that situation. This occured for example in cases where the participants would quickly move away from the robot and in cases where unusuall circumstances took place, or times when the human expert would make an obvious mistake. This data filtering took place by playing bag the data and annotating frames where innapropriate data was present. 
+The first step in processing was removing parts where we would not expect the robot to learn a correct mapping for. This occured for example in cases where the participants would quickly move away from the robot, in cases where unusual circumstances took place, or times when the human expert would make an obvious mistake. This data filtering took place by playing back the data and annotating frames where innapropriate data was present, so that they could be ingored further down the pipeline. 
 
-Next using the ground truth data from the Optitrack system we labeled which person was considered to be the interaction target during the conversation. This step is essential because during normal use of the TERESA system an interaction target also needs to be defined by the pilot. 
+Next using the ground truth data from the Optitrack system we labeled which person was considered to be the interaction target during the conversation. This step is essential because during normal use of the TERESA system an interaction target also needs to be defined by the pilot. The ground truth positions of the interaction targets was not used to correct the readings from the robots localisation system. This ensured that during learning we also learn a model of the localisation system`s noise. 
 
-Finally to enable learning a suitable representation for the state of the robot had to be deviced. The most important 
+After filteting the next step was data synchronisation. During the experiments the data from the localisation system and control come at different rates and are thus asynchronous. We synchronised the data by first setting the desired control rate for the final system at 10Hz and then retrieving the latest data from the localisation system and the control outputs at that rate.   
+
+At this point out data consisted of:
+\begin{itemize}
+	\item Inputs: N Tracked person positions at time t, $\{[x_1,y_1],[x_2,y_2] .., [x_N,y_N]\}_t$
+	\item Outputs: Angular and linear velocity at time t, ${v,w}_t$
+\end{itemize}
+
+A naive approach to the problem would attempt to learn a direct mapping from observations at time $t$ to actions at time $t$. This would have very limited chances of success for many reasons. The observations at a single timestep are not only noisy but also cannot encode context information such as the velocity and acceleration of the tracked persons. It is thus required that we augment the input vector to the learning algorithm with past time $\tau$ time instances. The input vector would thus become a concatenation of all tracked person vectors from time $t- \tau$ to $t$ $\{[x_1,y_1],[x_2,y_2] .., [x_{N_{t-\tau}},y_{N_{t-\tau}}]\}_{t-\tau},.. \{[x_1,y_1],[x_2,y_2] .., [x_{N_t},y_{N_t}]\}_t$ and the output would remain to be angular and linear velocity at time t.
+
+Another problem with our input data is that the number of tracked persons at each time step varies. This variability in the input data makes processing using conventional Machine Learning methods difficult. One way to combat this problem is to set a max number of tracked people at each timestep, $N_max$. We would then make sure to include the closest $N_max$ tracked persons at each time. If $N_t$ would be less than $N_max$ then we could pad that vector with zeros. While this would be a viable option it could pose several difficulties for learning in practice. As an example picture two successive frames with different number of people. We to ensure that past frames are constant we would have to make sure that if a person is the same in the two time slots they should be put into the same person slot in order to facilitate learning, this could make data hard to preprocess and still lead to mistakes. For this reason we take a slightly different approach. For each input vector at time t we create an image such as the one shown in Figure ??. Each person is drawn onto the image as a circle with intensity 1 while the interaction target is drawn as a circle with intensity 2. The position of this circles is determined by the person positions with respect to the robots frame. The created image has a fixed size and resolution which means that it can only represent persons that are present at a maximum distance of $d$ from the robot. In our $d$ was set to 2.5m. Other settings for the created image were as follows:
+
+\begin{itemize}
+	\item Resolution:
+\end{itemize}
+
+Another advantage of the image representation is that it allows us to use state of the art machine learning methods that exploit spacial structure in images such as convolutional neural networks which have proved to be very effective in image processing tasks. This is explored in the next section.
+
+\subsubsection{Outputs}
+The learning algorithm is expected to output a policy, i.e. a control output for a set of inputs. While our outputs are linear and angular velocities, it is not clear wether having continuous or discrete outputs is better in terms of learning and performance of the resulting policy. Having discrete outputs results in a classification problem which is typically easier to solve than a regression problem, which is the case with a continuous representation. Another drawback of continuous representations is that the output distribution could be mutimodal, which is something that continuous output networks do not typically account for. However a continuous representation is much more natural in this case and could result in a much more aggreable behaviour from the robot. For this reason we decided to try both representations and choose best one after deployment on the robot. 
+
+Another problem in terms of the outputs, for this specific application sourced from the fact that during the training data, the robot was stopped for far longer than it was actually moving. This posed problems in both the cases of a continuous and a discrete output. In the discrete case, far more datapoints where in the specific class of $(v,\omega) = (0,0)$ than any of the other individual classes, this can hurt the learning or even urge the network to simply output that class if sufficient measures are not taken. In the continuous case, it may cause the network to output smaller velocities than required. To combat this effect we took two measures. First we made sure that a similar portion of static and moving outputs where present in the data. Secondly we experimented with a hierarchical output architecture. In this case, the learning algorithm must first clasify wether or not the output should be (0,0) or something else. Then given that the output is not (0,0) it decides what the output should be. This feature made a big difference when deployed on the robot and it is hence present in all the models we consider.
 
 
 
-\subsection{Algorithm and representation}
+In fact the two are very hard to compare numerically appart from how the policy actually looks. 
+ 
+
+\subsection{Learning}
+
+In the previous section we explained how the data of person positions at each timestep was processed to allow learning. We also reasoned that an image representation such as the one shown in Figure ?? would be more appropriate. We further argued that the learning procedure would be much more effective if the evolution of these images over time was to be taken into account. In this section we use these two key points to construct a deep neural network (DNN) architecture in order to learn the mapping.
+
+\subsubsection{Convolutional Layers}
+Convolutional neural networks have been particuarly effective in extracting useful features from static images. Input to a convolutional layer is an image $n_ixn_i$ image with $c_i$ channels. The input convolved by a set of $k$ filters of dimentions $n_f \times n_f$, resulting in $k$ output feature maps that are then subject to a non-linearity and possibly a subsampling operation. The result of the computation can then be considered a new image of $k$ channels and dimention $n_1xn_1$. This procedure may thus be repreated for many layers of computation. A key aspect of convolutional networks is that the filter weights (or shapes) are learned. This means that they can be trained to extact the image features usefull for the specific application. 
+
+\subsubsection{Long Short Term Memory}
+Recurrent neural network architectures allow DNNs to deal with input sequences instead of simply static inputs.
+In contrast to fully connected and convolutional networks, an RNN allows the network to retain a state based on its previous inputs. This is done by essentially feeding back to the network a representation of the previous inuput. This makes them ideal in dealing with time varying and variable length inputs. An outline of an RNN is shown in Figure ??.
+  
+Long short term memory networks (LSTM) are the defacto standard architecture for Recurrent Neural Networks (RNN). While the general architecture follows the one shown in Figure ??, the way that the feedback and output of the network are computed is especially designed to prevent the gradients of the network from exploding or becoming to small. This has allowed LSTMs to excell in various sequance prediction tasks such as handwriting and speech recognition. 
+
+We have argued in the previous section, that it would be very hard to learn a mapping from inputs to demonstrations if the robot would have no memory of past input states (images). This is because, simply put, the environment is partially observable. Using the LSTMs allows us to use past inputs, which in turn allows it to disambiguate between different input images and makes it more robust to the person localisation system`s false possitives. 
+
+\subsubsection{Architecture}
+
+The overall architecture of the DNN we used is depicted in Figure ??. The current image at time $t$, $s_t$ is input to the system. This is then processed by two convolutional layers using kernels of size $5\times5$ resulting to 15 feature maps at each layer. At each layer the feature maps are subsampled by 2, so that the filters may operate at different scales. The output of the second convolutional layer is flattened and is input two LSTM layers. Finally using a fully connected network we reduce the output of the final LSTM network to the required dimentionality. The architecture is further visualised in Figures ??  and ??. Being fully differentiable the network is trained using backpropagation. 
+
 
 \subsection{Results}
 
