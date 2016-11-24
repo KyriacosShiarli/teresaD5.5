@@ -627,7 +627,87 @@ Finally to enable learning a suitable representation for the state of the robot 
 
 \subsection{Results}
 
-\section{Integrating cost functions and human demonstrations}
+\section{Integrating cost functions and human demonstrations}\label{sec:integratecost}
+
+\section{Integrating different cost functions using a multi-objective approach}
+For the TERESA project, we have different sources of reward/cost (Section \ref{sec:integratecost}). When there are multiple sources of possibly conflicting feedback with respect to the socially optimal behaviour of the telepresence robot, e.g.,  corresponding to the user experience of the pilot (i.e., the person who steers the robot from a distance) and to the user experience of the target(s) (the person(s) with whom the robot is collocated and interacts directly), it is unclear what the best way is to integrate these. In the previous section, we have integrated different sources of cost manually, a priori. However, a theoretically more grounded way would be to see the different sources of cost as different objectives, and compute a set of policies for the robot that make different trade-offs between these objectives. This leads to so-called multi-objective decision making. 
+
+We explored the possibilities for using multi-objective decision making for social robotics,  where different sources of feedback correspond to multiple objectives that we would like to optimise simultaneously. However, because these objective may be conflicting, there is typically no single policy that attains the optimal value for each objective. Therefore, we must compute a so-called coverage set (CS), that contains at least one optimal policy for each possible utility function (i.e., preference) that a user might have with respect to the objectives. Because different users might have different interests while interacting with the robot, we take the utility function of the robot designer as the ultimate goal. We assume that this utility function is unobservable at the time when we need to plan different policies, and can only be partially observed after different policies have been computed, as a result of expressed preferences between different alternative policies.
+
+In order to model different sources of feedback, we make use of an extension to the partially observable Markov decision process (POMDP) model that we have used in this and earlier work packages. Specifically, in a multi-objective partially observable Markov decision process (MOPOMDP) the states, actions, transition function, observations and observation function are the same as in a POMDP, but the reward function is vector-valued, i.e., each element of the reward vector corresponding to a transition, corresponds to a different objective. 
+
+In the following subsections we investigate the following questions: 1) which different sources of feedback can be obtain reliable data for, and how can we translate these different sources of feedback into a MOPOMDP; 2) what is an appropriate coverage set for this MOPOMDP and how can we compute it; and 3) how can we perform user selection in an effective way such that the robot designer can make an informed decision about which policy to select and ultimately implement in the robot. Finally, we discuss why this approach did not work well in this setting (yet), and promising alleys for further investigation for multiple objectives for robotics, such as deep multi-objective reinforcement learning (which would mitigate the need for using an explicit MOPOMDP model). 
+
+\subsection{Sources of feedback}
+In order to present policies that account for different objectives, we must first consider which sources of feedback we can obtain. In our original plan, we planned to have two objectives corresponding to the pilot resp. the target(s). In this setting, we would gather data from the interaction targets as well as the pilot in the following way: each person would observe robot behaviour in real-life experiments, and press a negative feedback button when the robot behaved badly. This would result in two objectives, corresponding to different roles. When gathering this data, it would be vitally important to see a difference between different behaviours in a) what is bad and what is not, but also b) which behaviours are worse than other bad behaviours. Sadly, we were unable to collect data to show this sufficiently. Therefore, we decided to focus on pilot feedback only. 
+
+The pilot had two interests while controlling the robot. Firstly, the behaviour of the robot must be socially acceptable. This can be expressed by giving explicit feedback. However, for the pilot to be able to use the system adequately, the robot must also detect people accurately enough (so that the pilot can select different interaction targets). We thus aimed to obtain data corresponding to three objectives: negative feedback on the social behaviour of the robot (inputted by the pilot) to minimise, and false positive detections and false negative detections (to be determined experimentally). 
+
+In order to gather this data, we used the single-interaction target approach scenario with no other people in the room. We used the wizard-of-oz approach, where the experimenter would control the robot. The wizard would show both behaviour that she would find socially acceptable, and socially unacceptable behaviour, while approaching the target. The pilot would speak with the interaction target over the robot, while giving negative feedback if the robot behaved badly. 
+
+When we tested this, we found that in this setting we would not have any false positives in the gathered data, and were therefore limited to two objectives: minimising the expected negative feedback from the pilot, while minimising the number of false negative detections (i.e., failures to detect the interaction target). We not however, that the feedback from the pilot was rather sparse, as indicated in the next section. 
+
+\subsection{MOPOMDP modelling}
+
+In this section we describe the standard MOPOMDP formulation. We have one interaction target, and no other people in the scenario. Therefore we define the state with this interaction target as the origin. The state consists of an angle and a distance with respect to the interaction target. Both these components are discretised. 
+
+The social reward function for the interaction target is learned from data, from feedback from the pilot of the robot, and is state-based. However, the data to learn this social reward function was sparse, the learned function may be estimated wrongly. We aim to improve the previously learned social reward function by imposing extra constraints on e.g., the smoothness of the social reward function. The detection reward are defined as the number of time steps where a false negative detection takes place.  The detection reward must also be learned from data.
+
+The resulting multi-objective POMDP is  a tuple $\langle S,A,R,T,\Omega,O,\gamma\rangle$ where 
+\begin{itemize}
+\item $S = < S_{\varphi}, S_{d}>$ is the state space consisting of an angle ($S_{\varphi}$) and a distance  ($S_{d}$) component. 
+\begin{itemize}
+\item $S_{d} = \{\mathtt{far}, \mathtt{opt_{detect}}, \dots, \mathtt{to}_i, \dots, \mathtt{opt_{social}}, \mathtt{close}\}$ where, 
+\item $\mathtt{far}$ is too far away
+\item $\mathtt{close}$ is too close
+\item $\mathtt{opt_{detect}}$ is the optimal detection distance (interval)
+\item $\mathtt{opt_{social}}$ is the optimal detection distance (interval)
+\item $\mathtt{to}_i$ are $N_{to}$ equally space trade-off intervals, where $N_{to}$ is minimally $1$ and maximally $5$. 
+\item $S_{\varphi}$ is a set of angle intervals, dividing the angles in equal parts within the field of vision (45 degrees to the left or right w.r.t. straight in front), and one behind. $N_{\varphi}$ is the number of intervals. $N_{\varphi}$ needs to be even.
+\end{itemize}
+\item $A = \{\mathtt{wait}, \mathtt{forward}, \mathtt{backward}, \mathtt{turnleft}, \mathtt{turnright}\}$ is the (self-explanatory) action space.
+\item ${\bf R}(s,a,s') = {\bf R}(s')  = ({R}_{soc}(s'), {R}_{fp}(s'))$ is the 2-objective reward function consisting of the state-based social reward, and the (also state-based) detection reward.  The reward depends on the discretisation of the state, and must thus be relearned every time we adjust $N_{to}$ and $N_{\varphi}$.
+\begin{itemize}
+\item ${R}_{soc}(s')$ is negative and learned from the negative feedback pilots gave explicitly in earlier experiments. To make this function more usable than we currently have we need to learn this function with smoothness constraints. ${R}_{soc}(s')$ only depends on the distance feature of the state space: $S_{d}$. 
+
+\item ${R}_{fn}(s')$ is the number of false negative detections based on the result state after taking an action. This depends on both the angle and the distance, i.e., the full state $S$. 
+\end{itemize}
+\item $T(s,a,s')$ is the transition function, giving the probability of a next state given an action and a current state; needs to be learned from data. 
+\item $\Omega = < \Omega_{d}, \Omega_{\varphi} >$ is the set of observations, equal in size to $S$. 
+
+\item $O$ is the observation function, giving the probability of each observation given an action and the resulting state. One special remark here is that the observation probability is equal to the detection probability used for the reward function. We note that the detection is done by a separate module, i.e., putting circles around people is ``outsourced''. A function exists that estimates the probability of accurate detection, but that is currently not over the same state-space. We thus have to re-learn this. 
+\item $\gamma$ is the discount factor. 
+\end{itemize}
+
+As in previous sections, we learn the transition, reward and observation functions using the wizard-of-oz approach, by counting the transitions from each state to each state, the social feedback given in each state, the number of false negatives in each state, and the observations for each state-action pair. 
+
+\subsection{Solution and algorithms}
+We assume that the utility function of the user can be seen as a linear combination of the value of a policy in each objective. However, we must take into account that this assumption might be an oversimplification. 
+
+In the planning phase, we can thus assume that the value of a policy can be linearly scalarised, but we do not know the correct weights. Therefore, in the planning phase we must aim to compute a convex coverage set, i.e., the a set of policies that contains at least one optimal policy for each (linear) weighting of the objectives.  When all weight is given to the social feedback objective, the robot will just aim to minimise this feedback signal. When some weight is given to the second objective, the agent will be more likely to perform actions that provide correct detections to the pilot of the system.  
+We can compute a convex coverage set for an MOPOMDP, using the state-of-the-art optimistic linear support with alpha reuse (OLSAR) planning algorithm (out of the box).  
+
+\subsection{Evaluation}
+After computing the convex coverage set, we show different policies to the users of the system. However, we cannot simply show the policy values with respect to social feedback and detection errors, and expect the user to be able to interpret these values. Instead, we ran the policies in a simulator, and plotted: a) the trajectory of the robot, and b) the detections it made. Such a plot took about 30 minutes to plot, using the Gazeebo simulator on ROS. In this way, we hoped that the policies would be able to be comparable in a meaningful way to the user. 
+
+However, we ran into several problems that we could not overcome: 
+\begin{itemize}
+\item The trajectories resulting from our planner look like Figure \ref{fig:motraj}. These trajectories appear jittery. In fact, it is hard to distinguish any differences between trajectories learned for different linear scalarisation weights. 
+\item Aggravating this situation is that the objectives where highly correlated. Therefore, even if the agent would know where it was perfectly, the robot would take the same actions in most of the state-space. I.e., in large parts of the state-space, the policies also \emph{need to be} indistinguishable. 
+\end{itemize}
+Therefore, we conclude that --- while we still believe multiple objectives could contribute to social robotics --- for this use case, a user could not meaningfully select a policy from the convex coverage set. 
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{motrajectory.png}
+\caption{A trajectory of the social robot (in red) interacting with a target (the gray 
+cross), making detections (the blue crosses), and finding a balance between the optimal 
+detection distance (the red circle) and the optimal social distance (the green circle).}
+\label{fig:motraj}
+\end{figure}
+
+\subsection{Lessons learnt and future research directions}
+TODO
+
 
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
