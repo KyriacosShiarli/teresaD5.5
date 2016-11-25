@@ -21,7 +21,11 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
-
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes,arrows,chains}
 \DeclareMathOperator*{\argmin}{\arg\!\min} 
 \DeclareMathOperator*{\argmax}{\arg\!\max}
 \usepackage{mathtools}
@@ -566,20 +570,20 @@ In this section, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which l
 \label{sec:sl_policy}
 
 Apart from being able to navigate socially, a key functionality for our semi-autonomous telepresence system, is to allow the pilot to engage in conversation 
-with the people around the robot, without any input from the pilot himself. While in some ideal conditions this would be a simple tracking problem, it is no longer the case in real social environments. This is because firstly there could be significant sensor noise, not allowing the robot to track everyone in its surroundings. Secondly, in crowded environments social norms become harder to hard code. The TERESA system attempts to deal with these problems by learning from human interaction.
+with the people around the robot, without any input from the pilot himself. While in some ideal conditions this would be a simple tracking problem, (the robot attempts to always face a person), it is no longer the case in real social environments. This is because firstly there could be significant sensor noise, not allowing the robot to track everyone in its surroundings. Secondly, in crowded environments social norms become harder to hard code. For example we might need to converse with various sizes of groups at different formations. The TERESA system attempts to deal with these problems by learning from human interaction.
 
-In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robots behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. In this deliverable we take a different approach. Instead of asking direct feedback from users we employ a human expert to demonstrate the correct behaviour to the robot. Using the collected demonstrations we learn a direct mapping from sensor readings to socially appropriate actions. The rest of the section is organised as follows. 
+In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robot`s behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. In this deliverable we take a different approach. Instead of asking direct feedback from users we employ a human expert to demonstrate the correct behaviour to the robot. Using the collected demonstrations we learn a direct mapping from sensor readings to socially appropriate actions. The rest of the section is organised as follows. 
 
 \begin{itemize}
-	\item In Section \ref{sec:initial_experiment} we describe local experiments performed at the UvA. The aim of this experiments where to simulate different social situations and extract human demonstrations of control during robot conversation. We further describe how this data was filtered and processed.
-	\item In Section ?? we describe the use a Deep Neural Network architecture to learn a robust social conversation policy from the collected data. 
-	\item Finally in Section ?? we perform an evaluation of our resulting system.
+	\item In Section \ref{sec:demonstration_experiment} we describe local experiments performed at the UvA. The aim of this experiments where to simulate different social situations and extract human demonstrations of control during robot conversation. We further describe how this data was filtered, processed. Finally we describe the input and output representations used in the learning.
+	\item In Section \ref{sec:dnn_arch} we describe the use a Deep Neural Network architecture to learn a robust social conversation policy from the collected data, using the data and representations from the previous section. 
+	\item Finally in Section \ref{sec:demonstration_results} we perform an evaluation of our resulting system.
 \end{itemize} 
 
 The reasoning behind our approach is described in more detail in Deliverable 5.4. 
 
 \subsection{Local Experiments and demonstration collection}
-\label{sec:initial_experiment}
+\label{sec:demonstration_experiment}
 The fist step to achieving the goals set out in this section was to perform experiments in order to collect appropriate demonstration data in various social interaction situations. These experiments took place at the University of Amsterdam in August 2016. These were focused on collecting control data from human demonstrations at different social situations as well as data from all of the robot's sensors. Using machine learning, the aim was to match sequences of input data to the appropriate controls allowing the robot to thus mimic the human demonstrations in new unseen situations. The main aims of the experimental setup and procedure were:
 
 \begin{itemize}
@@ -588,7 +592,7 @@ The fist step to achieving the goals set out in this section was to perform expe
 \end{itemize}
 
 \subsubsection{Experimental Setup}
-The setup of this experiment is similar to the one used in the previous deliverable and is depicted in figure ??. The TERESA robot is placed along with four interaction targets into the "interaction room". Three of the interaction targets are volunteers and vary with each experimental session while one is a researcher from the project. During the experimental session the interaction targets interact with the robot in a social manner. 
+The setup of this experiment is similar to the one used in the previous deliverable and is depicted in Figure \ref{fig:experiment} . The TERESA robot is placed along with four interaction targets into the "interaction room". Three of the interaction targets are volunteers and vary with each experimental session while one is a researcher from the project. During the experimental session the interaction targets interact with the robot in a social manner. 
 
 The researcher also participates in the interaction but has the additional role of inducing different social situations such that sufficient variability in the data is ensured. This was done by instructing the volunteers to:
 
@@ -609,6 +613,15 @@ The following was collected during our experiments:
 	\item Laser and RGBD sensor data.
 	\item Odometry.
 \end{itemize}
+
+	\begin{figure}
+	\centering
+	%\vspace{-3.3mm}
+	    \includegraphics[width=0.8\textwidth]{figures/experiment.pdf}
+	%\vspace{-4mm}
+	  \caption[Conv layer]{The experimental setting}
+	  \label{fig:experiment}
+	\end{figure}
 
 \subsubsection{Processing}
 
@@ -634,7 +647,7 @@ Another problem with our input data is that the number of tracked persons at eac
 	\item Resolution:
 \end{itemize}
 
-Another advantage of the image representation is that it allows us to use state of the art machine learning methods that exploit spacial structure in images such as convolutional neural networks which have proved to be very effective in image processing tasks. This is explored in the next section.
+Another advantage of the image representation is that it allows us to use state of the art machine learning methods that exploit spacial structure in images such as convolutional neural networks which have proved to be very effective in image processing tasks \cite{krizhevsky2012imagenet}. This is explored in the next section.
 
 \subsubsection{Outputs}
 The learning algorithm is expected to output a policy, i.e. a control output for a set of inputs. While our outputs are linear and angular velocities, it is not clear wether having continuous or discrete outputs is better in terms of learning and performance of the resulting policy. Having discrete outputs results in a classification problem which is typically easier to solve than a regression problem, which is the case with a continuous representation. Another drawback of continuous representations is that the output distribution could be mutimodal, which is something that continuous output networks do not typically account for. However a continuous representation is much more natural in this case and could result in a much more aggreable behaviour from the robot. For this reason we decided to try both representations and choose best one after deployment on the robot. 
@@ -642,34 +655,364 @@ The learning algorithm is expected to output a policy, i.e. a control output for
 Another problem in terms of the outputs, for this specific application sourced from the fact that during the training data, the robot was stopped for far longer than it was actually moving. This posed problems in both the cases of a continuous and a discrete output. In the discrete case, far more datapoints where in the specific class of $(v,\omega) = (0,0)$ than any of the other individual classes, this can hurt the learning or even urge the network to simply output that class if sufficient measures are not taken. In the continuous case, it may cause the network to output smaller velocities than required. To combat this effect we took two measures. First we made sure that a similar portion of static and moving outputs where present in the data. Secondly we experimented with a hierarchical output architecture. In this case, the learning algorithm must first clasify wether or not the output should be (0,0) or something else. Then given that the output is not (0,0) it decides what the output should be. This feature made a big difference when deployed on the robot and it is hence present in all the models we consider.
 
 
+\subsection{Learning} \label{sec:dnn_arch}
 
-In fact the two are very hard to compare numerically appart from how the policy actually looks. 
- 
-
-\subsection{Learning}
-
-In the previous section we explained how the data of person positions at each timestep was processed to allow learning. We also reasoned that an image representation such as the one shown in Figure ?? would be more appropriate. We further argued that the learning procedure would be much more effective if the evolution of these images over time was to be taken into account. In this section we use these two key points to construct a deep neural network (DNN) architecture in order to learn the mapping.
+In the previous section we detailed the form of our input states and output controls for the learning task treating the actual algorithm as a black box. We reasoned that an input image representation such as the one shown in Figure ?? would be more appropriate. We further argued that the learning procedure would be much more effective if the evolution of these images over time was to be taken into account. In this section we use these two key points to construct a deep neural network (DNN) architecture in order to learn this mapping from inputs to controls.
 
 \subsubsection{Convolutional Layers}
-Convolutional neural networks have been particuarly effective in extracting useful features from static images. Input to a convolutional layer is an image $n_ixn_i$ image with $c_i$ channels. The input convolved by a set of $k$ filters of dimentions $n_f \times n_f$, resulting in $k$ output feature maps that are then subject to a non-linearity and possibly a subsampling operation. The result of the computation can then be considered a new image of $k$ channels and dimention $n_1xn_1$. This procedure may thus be repreated for many layers of computation. A key aspect of convolutional networks is that the filter weights (or shapes) are learned. This means that they can be trained to extact the image features usefull for the specific application. 
+Convolutional neural networks have been particuarly effective in extracting useful features from static images \cite{krizhevsky2012imagenet}. Input to a convolutional layer is an $n_i \times n_i$ image with $c_i$ channels. The input convolved by a set of $K$ filters of dimentions $n_f \times n_f$, resulting in $K$ output feature maps. These are then subject to a non-linearity, in this case a rectified linear unit (ReLu) and possibly a subsampling operation, in this case max pooling. The result of the computation can then be considered a new image of $K$ channels and dimention $n_1xn_1$, where the subscript denotes the layer number. This procedure may thus be repreated for many layers of computation. A key aspect of convolutional networks is that the filter weights (or shapes) are learned. This means that they can be trained to extact the image features usefull for the specific application. Such a convolutional layer is shown in Figure \ref{fig:conv_layer}.
+
+	\begin{figure}
+	\centering
+	%\vspace{-3.3mm}
+	    \includegraphics[width=0.8\textwidth]{figures/conv_layer.pdf}
+	%\vspace{-4mm}
+	  \caption[Conv layer]{A convolutional layer.}
+	  \label{fig:conv_layer}
+	\end{figure}
+
 
 \subsubsection{Long Short Term Memory}
 Recurrent neural network architectures allow DNNs to deal with input sequences instead of simply static inputs.
-In contrast to fully connected and convolutional networks, an RNN allows the network to retain a state based on its previous inputs. This is done by essentially feeding back to the network a representation of the previous inuput. This makes them ideal in dealing with time varying and variable length inputs. An outline of an RNN is shown in Figure ??.
-  
-Long short term memory networks (LSTM) are the defacto standard architecture for Recurrent Neural Networks (RNN). While the general architecture follows the one shown in Figure ??, the way that the feedback and output of the network are computed is especially designed to prevent the gradients of the network from exploding or becoming to small. This has allowed LSTMs to excell in various sequance prediction tasks such as handwriting and speech recognition. 
+In contrast to fully connected and convolutional networks, an RNN allows the network to retain a state based on its previous inputs. This is done by essentially feeding back to the network a representation of the previous inuput. This makes them ideal in dealing with time varying and variable length inputs. An outline of an RNN is shown in Figure \ref{fig:RNN}.
+\def\layersep{1.5cm}
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=2.5cm]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt]
+    \tikzstyle{neuron}=[circle,very thick,minimum size=17pt,inner sep=2pt]
+    \tikzstyle{input neuron}=[neuron, draw=black!50, fill=white];
+    \tikzstyle{output neuron}=[neuron, draw=black!50, fill=white];
+    \tikzstyle{hidden neuron}=[neuron, draw=black!50, fill=white];
+    \tikzstyle{annot} = [text width=4em, text centered]
 
-We have argued in the previous section, that it would be very hard to learn a mapping from inputs to demonstrations if the robot would have no memory of past input states (images). This is because, simply put, the environment is partially observable. Using the LSTMs allows us to use past inputs, which in turn allows it to disambiguate between different input images and makes it more robust to the person localisation system`s false possitives. 
+    % Draw the input layer nodes
+    \foreach \name / \y in {1,...,3}
+    % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
+        \node[input neuron] (I-\name) at (0,-\y) {};
+        
+    \draw [->, thick, >=stealth', bend left=200, looseness=7] (I-2.east) to node [swap] {}  (I-2.west);
+    
+    \path (I-3) edge (I-2);
+    \path (I-2) edge (I-1);    
+    
+    \node[text width=0cm] (x) at (-0.15, -1.0) {$o_t$};
+    \node[text width=0cm] (h) at (-0.15, -2.0) {$h$};
+    \node[text width=0cm] (o) at (-0.15, -3.0) {$x_t$};
+    
+    \node[text width=0cm] (o) at (\layersep-0.15cm, -2.0) {$\Rightarrow$};
+    
+    % Draw expanded network
+    \foreach \name / \x in {1/1,2/2,4/4}
+        \foreach \namee / \y in {1,...,3}
+            \node[input neuron] (I-\name-\namee) at (\layersep+\layersep*\x,-\y) {};
+            
+    \path (I-1-3) edge (I-1-2);
+    \path (I-1-2) edge (I-1-1);
+    \path (I-1-2) edge (I-2-2);
+    \path (I-2-3) edge (I-2-2);
+    \path (I-2-2) edge (I-2-1);
+    \path (I-2-2) edge (I-4-2);
+    \path (I-4-3) edge (I-4-2);
+    \path (I-4-2) edge (I-4-1); 
+    
+    \node[text width=0cm] (x) at (\layersep * 2 -0.15cm, -1.0) {$o_0$};
+    \node[text width=0cm] (h) at (\layersep * 2 -0.15cm, -2.0) {$h_0$};
+    \node[text width=0cm] (o) at (\layersep * 2 -0.15cm, -3.0) {$x_0$};
+    \node[text width=0cm] (x) at (\layersep * 3 -0.15cm, -1.0) {$o_1$};
+    \node[text width=0cm] (h) at (\layersep * 3 -0.15cm, -2.0) {$h_1$};
+    \node[text width=0cm] (o) at (\layersep * 3 -0.15cm, -3.0) {$x_1$};
+    \node[text width=0cm] (h) at (\layersep * 4 -0.15cm, -1.0) {$\dots$};
+    \node[text width=0cm] (o) at (\layersep * 4 -0.15cm, -3.0) {$\dots$}; 
+    \node[text width=0cm] (x) at (\layersep * 5 -0.15cm, -1.0) {$o_t$};
+    \node[text width=0cm] (h) at (\layersep * 5 -0.15cm, -2.0) {$h_t$};
+    \node[text width=0cm] (o) at (\layersep * 5 -0.15cm, -3.0) {$x_t$}; 
+\end{tikzpicture}
+\caption{An unfolded recurrent neural network}
+\label{fig:RNN}
+\end{figure}
+  
+Long short term memory networks (LSTM) \cite{hochreiter1997long} are an effective standard architecture for Recurrent Neural Networks. While the general architecture follows the one shown in Figure \ref{fig:RNN}, the way that the feedback and output of the network are computed is especially designed to prevent the gradients during learning from exploding or becoming too small. This has allowed LSTMs to excell in various sequence prediction tasks such as handwriting and speech recognition. 
+
+We have argued in the previous section, that it would be very hard to learn a mapping from inputs to demonstrations if the robot would have no memory of past input states (images). This is because, simply put, the environment is partially observable. Using the LSTMs allows the network to use past inputs, which in turn allows it to disambiguate between different input images and makes it more robust to the person localisation system`s false possitives. 
+
+\tikzstyle{block} = [draw,rectangle,thick,minimum height=2em,minimum width=2em]
+\usetikzlibrary{shapes,snakes}
+\begin{figure}[h!]
+  \hspace{-1cm}
+  \begin{tikzpicture}
+  \draw[rounded corners=15pt, color=lightgray] (-3,0) rectangle (-1,5);
+  \draw[fill=white, color=white] (-3.1,-0.1) rectangle (-2.5,5.1);
+  \draw[rounded corners=15pt] (0,0) rectangle (6,5);
+  \draw[rounded corners=15pt, color=lightgray] (7,0) rectangle (9,5);
+  \draw[fill=white, color=white] (8.5,-0.1) rectangle (9.1,5.1);
+
+  \node (Htm1) at (-2,0.5) {};
+  \node (Ctm1) at (-2,4.25) {};
+  \node (Htm2) at (8,0.5) {};
+  \node (Ctm2) at (8,4.25) {};
+  
+  %\node [rounded corners, draw=black, rectangle split, rectangle split parts=2] (zt) at (1,1.5) {\textbf{$z_t$} \nodepart{second} \footnotesize $(h_{t-1}\Vert x_t)$};
+  \node[draw=black,circle, minimum size=0.5cm,inner sep=0pt] (Ct) at (0.75,4.25) {\textbf{$\times$}};
+  
+    \node[draw=black,circle, minimum size=0.8cm,inner sep=0pt] (sig1) at (0.75, 2) {$\sigma$};
+    \draw [-, line width=1mm, bend left=60, bend right=30, looseness=1, opacity=0.1] (sig1.south west) to node [swap] {}  (sig1.center);
+    \draw [-, line width=1mm, bend left=0, bend right=-30, looseness=1, opacity=0.1] (sig1.center) to node [swap] {}  (sig1.north east);
+    
+    \node[draw=black,circle, minimum size=0.8cm,inner sep=0pt] (sig2) at (1.75, 2) {$\sigma$};
+    \draw [-, line width=1mm, bend left=60, bend right=30, looseness=1, opacity=0.1] (sig2.south west) to node [swap] {}  (sig2.center);
+    \draw [-, line width=1mm, bend left=0, bend right=-30, looseness=1, opacity=0.1] (sig2.center) to node [swap] {}  (sig2.north east);
+    
+        \node[draw=black,circle, minimum size=0.8cm,inner sep=0pt] (tanh1) at (2.75, 2) {\footnotesize $tanh$};
+    \draw [-, line width=1mm, bend left=60, bend right=30, looseness=1, opacity=0.1] (tanh1.south west) to node [swap] {}  (tanh1.center);
+    \draw [-, line width=1mm, bend left=0, bend right=-30, looseness=1, opacity=0.1] (tanh1.center) to node [swap] {}  (tanh1.north east);
+    
+    \node[draw=black,circle, minimum size=0.8cm,inner sep=0pt] (sig3) at (3.75, 2) {$\sigma$};
+    \draw [-, line width=1mm, bend left=60, bend right=30, looseness=1, opacity=0.1] (sig3.south west) to node [swap] {}  (sig3.center);
+    \draw [-, line width=1mm, bend left=0, bend right=-30, looseness=1, opacity=0.1] (sig3.center) to node [swap] {}  (sig3.north east);
+  
+    \node[draw=black,circle, minimum size=0.5cm,inner sep=0pt] (zt) at (0.75,0.5) {\textbf{$\Vert$}};
+  
+    \node[draw=black,circle, minimum size=0.5cm,inner sep=0pt] (Ct2) at (2.75,4.25) {\textbf{$+$}};
+   \node[draw=black,circle, minimum size=0.5cm,inner sep=0pt] (Ct3) at (2.75,3.25) {\textbf{$\times$}};  
+   
+   \node[draw=black,circle, minimum size=0.7cm,inner sep=0pt] (tanh) at (4.75, 3.5) {\tiny $tanh$};
+   \node[draw=black,circle, minimum size=0.5cm,inner sep=0pt] (out1) at (4.75,2.5) {\textbf{$\times$}};     
+   
+  
+  \node[draw=black,fill=black,circle, minimum size=0.1cm,inner sep=0pt] (split1) at (0.75,1) {};
+  \node[draw=black,fill=black,circle, minimum size=0.1cm,inner sep=0pt] (split2) at (1.75,1) {};
+  \node[draw=black,fill=black,circle, minimum size=0.1cm,inner sep=0pt] (split3) at (2.75,1) {};
+  \node[draw=black,fill=black,circle, minimum size=0cm,inner sep=0pt] (split4) at (3.8,1) {};
+  
+  \node[draw=black,fill=black,circle, minimum size=0.1cm,inner sep=0pt] (split5) at (4.75,4.25) {};
+  
+  \node[draw=black,fill=black,circle, minimum size=0.1cm,inner sep=0pt] (split6) at (5.25,2.5) {};
+  
+  \draw[-latex] (Htm1) -- (zt) node[pos=0.6, below] {$h_{t-1}$};
+  \draw[-latex] (Ctm1) -- (Ct) node[pos=0.6, below] {$c_{t-1}$};
+  \draw[-latex] (zt) -- (sig1);% node[pos=0.7, left] {$z_t$};
+  \draw[-latex] (split2) -- (sig2);% node[pos=0.5, left] {$z_t$};
+  \draw[-latex] (split3) -- (tanh1);%; node[pos=0.5, left] {$z_t$};
+  \draw[-latex] (split4) -- (sig3);%; node[pos=0.5, left] {$z_t$};  
+  \draw[-latex] (sig1) -- (Ct) node[pos=0.5, left] {$f_t$};
+  \draw[-latex] (Ct) -- (Ct2);
+  \draw[-latex] (Ct3) -- (Ct2);
+  \draw[-latex] (tanh1) -- (Ct3) node[pos=0.5, left] {$\widetilde{C}_t$};
+  \draw[-latex] (Ct2) -- (Ctm2) node[pos=0.73, below] {$c_t$};
+  \draw(sig2) -- (1.75,3.25);  
+  \draw[-latex] (1.75,3.25) -- (Ct3) node[pos=-0.1, above] {$i_t$};
+  \draw (split1) -- (split4) ;
+  \draw(sig3) -- (3.75,2.5) ;
+  \draw[-latex] (3.75,2.5) -- (out1) node[pos=0.5, above] {$o_t$}; 
+  \draw[-latex] (split5) -- (tanh);
+  \draw[-latex] (tanh) -- (out1);
+  \draw(out1) -- (split6);
+  \draw[-latex] (split6) -- (5.25,5.5) node[pos=0.95, left] {$h_t$}; 
+  \draw (split6) -- (5.25,0.5);
+  \draw[-latex] (5.25,0.5) -- (Htm2) node[pos=0.5, below] {$h_t$};
+  
+  \node[draw=black,circle] (xt) at (0.75, -1) {$x_t$};
+  
+  \draw[-latex] (xt) -- (zt) node[pos=0.4, left] {$x_t$};
+
+  \tikzstyle{mybox} = [draw=black, thick,
+    rectangle, rounded corners, inner sep=2pt, inner ysep=10pt]
+    
+  \node [mybox] (box) at (10,2.5) {
+   \begin{minipage}{0.05\textwidth}\hspace{2em}\end{minipage}
+   \begin{minipage}{0.18\textwidth}
+      \footnotesize
+      connection\\
+      braching point\\
+      multiplication\\
+      sum\\
+      concatenation\\
+      neural network layer\\
+      hyperbolic tangent\\
+      logistic sigmoid
+   \end{minipage}}; 
+  \node[fill=white] at (box.north) {\textbf{Legend}};
+
+  \draw[-latex](9,4.4) -- (8.6,4.4);
+  \node[draw=black,fill=black,circle, minimum size=0.1cm,inner sep=0pt] (legend_split) at (8.8,4) {};
+   \node[draw=black,circle, minimum size=0.5cm,scale = 0.5,inner sep=0pt] (legend_mult) at (8.8,3.56) {\textbf{$\times$}};
+   \node[draw=black,circle, minimum size=0.5cm,scale = 0.5,inner sep=0pt] (legend_plus) at (8.8,3.14) {\textbf{$+$}};
+   \node[draw=black,circle, minimum size=0.5cm,scale = 0.5,inner sep=0pt] (legend_vert) at (8.8,2.71) {\textbf{$\Vert$}};
+    
+    \node[draw=black,circle, minimum size=0.8cm,scale = 0.5, inner sep=0pt] (legend_neural) at (8.8, 2.3) {};
+    \draw [-, line width=0.5mm, bend left=60, bend right=30, looseness=1, opacity=0.1] (legend_neural.south west) to node [swap] {}  (legend_neural.center);
+    \draw [-, line width=0.5mm, bend left=0, bend right=-30, looseness=1, opacity=0.1] (legend_neural.center) to node [swap] {}  (legend_neural.north east);
+    
+    \node[scale=0.5] (legend_tanh) at (8.8,1.48) {\footnotesize tanh};
+    \node[scale=0.5] (legend_sigm) at (8.8,0.61) {$\sigma$};
+  \end{tikzpicture}
+\caption{Long short term memory}
+\label{fig:LSTM}
+\end{figure}
 
 \subsubsection{Architecture}
+The overall architecture of the DNN we used is depicted in Figure \ref{fig:net_arch}. The current image at time $t$, $s_t$ is input to the system. This is then processed by two convolutional layers using kernels of size $5\times5$ resulting to 15 feature maps at each layer. At each layer the feature maps are subsampled by 2, so that the filters may operate at different scales. The output of the second convolutional layer is flattened and is input to two LSTM layers of 500 and 100 hidden units respectively. Finally using a fully connected layers we reduce the output of the final LSTM network to the required dimentionality. Being fully differentiable the network is then trained using backpropagation using the Adam optimising routine. Note that in cases where the hierarchical structure is not used the output will only be a linear an angular velocity.
 
-The overall architecture of the DNN we used is depicted in Figure ??. The current image at time $t$, $s_t$ is input to the system. This is then processed by two convolutional layers using kernels of size $5\times5$ resulting to 15 feature maps at each layer. At each layer the feature maps are subsampled by 2, so that the filters may operate at different scales. The output of the second convolutional layer is flattened and is input two LSTM layers. Finally using a fully connected network we reduce the output of the final LSTM network to the required dimentionality. The architecture is further visualised in Figures ??  and ??. Being fully differentiable the network is trained using backpropagation. 
+
+
+\subsubsection{Continuous Learning Pipeline}
+	In addition to the original experiments, we have created a learning pipeline for the robot that allows any human teacher to simply enrich the data that the networks is learned with. The pipeline runs as follows. First the most recently learned policy is deployed on the robot. The robot is then used for several interactions. During these interactions the robot is autonomous, however if any bad behaviour occurs the human demonstrator intervenes giving commands through a joystick. Any human intervention is then recorded by the robot. At the end of the interaction session any collected demonstrations are processed automatically and added to the rest of the data. Overnight the robot used the whole dataset to learn a new policy, at which point the process can be repeated. An outline of our learning pipeline is shown in Figure \ref{fig:pipeline}
+	
+	
+	\begin{figure}
+	\centering
+	%\vspace{-3.3mm}
+	    \includegraphics[width=0.8\textwidth]{figures/pipeline.pdf}
+	%\vspace{-4mm}
+	  \caption[Pipeline]{The continuous learning pipeline.}
+	  \label{fig:pipeline}
+	\end{figure}
 
 
 \subsection{Results}
+In this section we plot the learning performance in terms of train and test loss for 3 architectures. These are shown in Figures \ref{fig:SL_results}. I will perform a standardised comparison in terms of the hierarchical-non-hierarchical cases soon.
+
+\begin{figure}[t]
+	\centering
+%	\hspace{-5cm}
+      \begin{subfigure}[b]{0.45\columnwidth}
+
+    \includegraphics[clip=true,width=1.\textwidth]{figures/mse.png}
+    \caption{Continuous}
+    \label{fig:cont_results}
+  \end{subfigure}
+ % \hspace{5mm}
+  \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[clip=true,width=1.\textwidth]{figures/d_xent.png}
+    \caption{Discrete}
+    \label{fig:discrete_results}
+  \end{subfigure} 
+  
+    \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[clip=true,width=1.\textwidth]{figures/dh_xent.png}
+    \caption{Hierarchical and discrete}
+    \label{fig:hier_discrete_results}
+  \end{subfigure} 
+
+  %\vspace{-3mm}
+  \caption[SL train test]{Train and test loss for the supervised learning under different output representations}
+  %\vspace{-3mm}
+  \label{fig:SL_results}
+\end{figure}
+
+
+
+
 
 \section{Integrating cost functions and human demonstrations}
+\subsection{Introduction}
+In the previous section we employed a DNN architecture to learn a social body pose policy from demonstrations which is this section we refer to as the SL policy. One might argue however, that this would require a lot of samples from human demonstrations in order to result in a satisfactory behaviour for the robot. It is for this reason why Reinforcement Learning (RL) is seeing revived popularity. In RL, one only needs to encode the preferences of a user in a cost(or reward) function and using that the robot can learn continuously. Designing a social cost function for our purposes however can be very challenging. One way to combat this drawback would be to use Inverse Reinforcement Learning (IRL) along with the collected human demonstrations. IRL was discussed in this and previous deliverables and has played a key role in deriving our navigation cost functions. The problem in this case is that our domain is partially observable and high dimentional. This means that we would need to use model free IRL methods such as [CITE REIRL] which can be very time consuming and still unreliable. In this section we take a slightly different approach. We investigate the possibility of using the policy learned from human demonstrations in combination with a hand coded cost function with the aim of learning a policy that both mimics the demonstrations and minimises the required cost simultaneously and prefferebly without any tradeoff. By doing so we aim to:
 
+\begin{itemize}
+	\item Use the policy from human demonstrations to learn faster using RL.
+	\item Using RL to improve the SL policy where we feel is not peforming adequetly.   
+\end{itemize}
+
+In this section we propose a method that can integrate SL policies with hand coded cost(reward) functions and we show that for reasonable cost functions the above requirements can be satisfied. We begin with an introduction to basic policy gradient mathods for reinforcement learning in Section \ref{sec:pg_background}. We proceed to propose a simple cost function that tests our requirements above as well as an exploration strategy for the RL algorithm, this is done in Section ??. Finally we present some results in Section ?? and discuss future work in Section ??.
+
+
+\subsection{Background}\label{sec:pg_background}
+
+We assume a Markov decision process (MDP) with a state space $\mathcal{S}$ and an action space $\mathcal{A}$ an agent takes an action $a$ at a state $s$ according to a policy $\pi_\theta(s,a)$ where theta are the parameters of the policy, in our case the parameters of the neural network. For each state action pair the environment returns a reward $r(s,a)$ and the agent transitions to a next state according to a stationary dynamics dystribution $p(s_{t+1}|s_t,a_t)$. A sample return $r^{\gamma}$ is the discounted sum of rewards according to a discount factor $\gamma$. The Value function for a policy is defined as the expected return that results from following a policy $\pi$ starting at state $s$,
+
+
+\begin{equation}
+	V^{\pi} = \mathbb{E}[r^{\gamma}|\pi]
+\end{equation}
+
+and the Action-Value function is defined as the expected return that results from starting at state $s$, taking action $a$ and then following policy $\pi$
+
+\begin{equation}
+	Q^{\pi}(s,a) = \mathbb{E}[r^{\gamma}|\pi,a]
+\end{equation}
+
+
+The traditional methods for learning in RL are based upon an agent learning $Q(s,a)$. Once this quantity is learned for all states and actions an agent can act greedily with respect to this function meaning that the action $a$ at state $s$ will be taken according to:
+\begin{equation}
+	a = \argmax_a Q(s,a) \label{eq:Q}
+\end{equation}
+
+Because the maximisation in \ref{eq:Q} can sometimes be very hard to perform, e.g in continuous spaces, policy gradient [cite barto] methods usually act as an alternative. In this section we do not consider a continuous action space for the sake of simplicity, we do however use policy gradient methods. This is because we aim to integrade our SL policy with cost functions. Since our DNN already outputs actions and not $Q(s,a)$ it is much more straighforward to make this integration happen using policy gradient methods. In this work we use the REINFORCE algorithm \cite{williams1992simple} which we review here. 
+
+A policy search methods attempt to optimise a performance objective defined as:
+
+\begin{equation}
+	J(\pi_{\theta}) = \int_{\mathcal{S}} \rho(s)^{\pi} \int_{\mathcal{A}}\pi_{\theta}(s,a)r(s,a)dads
+\end{equation}
+
+Where:
+
+Policy gradient methods attempt to perform gradient descent on this objective. The policy gradient theorem [cite barto] states that the gradient of the objective with respect to the policy parameters $\theta$ does not depend of the state distribution.
+
+The REINFORCE algrotithm calculates $Q(s,a)$ using sample returns.
+
+
+
+In the case of our SL policy derived in the previous section, it could be the case that although the output is stochastic the network is too confident about a certain action. This would prevent any exploration from the agent which would make learning slow and possibly inneffective. In this case it is useful to act according to a different behaviour policy $\beta(s,a)$ while computing a gradient for our original policy $pi_{\theta}(s,a)$. The only modification to equation ?? would be weighing the gradient by an importance ratio, i.e.,  
+
+
+
+
+\subsection{Implementation}
+In this section we describe the aspects of the algorithm specific to out implementation of REINFORCE. The state representation remains the one we have described in Section ??. As an action representation we use a non-hierachical discretised action representation.
+
+\subsubsection{Learning scenario and reward function}
+
+As a proof of concept we use a simulated static scenario where two persons are standing in the middle of a square room as shown in Figure ??. The robot is spawned at different orientations and positions around the persons every 40 secods, which we consider the duration of one episode. Although there are two persons in the scene, only one of the two is considered the interaction target. Hence in our image input representation only one circle is given a value of 2 and the other a value of 1. The reward function in this scenario consists of two parts. The first which we name $r_i$ is a based on the orientation of the robot with respect to the interaction target. 
+
+\begin{equation}
+	r_i = \frac{\pi}{3} -|\phi_{rel}| 
+\end{equation}
+
+If the moves at a distance of more than 2.5 meters away from either of the persons it recieves a negative reward of -2 for each person for which the condition is satisfied and no reward based on its orientation from the interaction target. I.e, at more than 2.5m the robot is considered to have moved away from the conversation. The reward function with respect to the interaction target is shown in Figure ??.
+
+\subsubsection{Importance Sampling Distribution}
+In order to promote our pre-trained SL policy to explore different actions exploration policies can be used. One very basic form of exploration policy is $\epsilon-$greedy. Under this exploration policy the agent takes the action prescribed by the policy with probability $1-\epsilon$ and with probability $\epsilon$ takes a unoformly random action from $A$. This is fine for most applications, however for control applications like ours the control rate of the agent is quite high (10Hz) and actions that are similar in magnitute have similar dynamics assosciated with them. This means that it makes more sense for the agent to explore actions around the previous action rather than picking an action at random. In recent work researchers use different forms of correlated processes in order to generate useful exploratory trajectories, for example in \cite{lillicrap2015continuous} the authors use an  Ornstein-Uhlenbeck process \cite{uhlenbeck1930theory}. In our case we do not have continuous actions and thus take a slightly different approach to produce correlated action samples. Supose we have 7 available actions to choose from. Instead of choosin an action with uniform probability we place a Gaussian function with a mean on the previous action \emph{index} $a^{idx}_{t-1}$ and a scale c. We can then calculate the probability of action index at time $t$, $a^{idx}_{t-1}$ according to,   
+
+
+\begin{equation}
+	p(a^{idx}_t) =\frac{\exp(-\frac{(a^{idx}_t-a^{idx}_{t-1})^2}{2c^2})}{\sum_i^{|\mathcal{A}|} \exp(-\frac{(a^{idx}_i-a^{idx}_{t-1})^2}{2c^2}) }.
+\end{equation}
+
+This means that we give a greater weight for actions closer in index to our previous action and assuming that actions closer in index are more similar as in our case we can achieve a correlated noise effect. A sample of such an action process is shown in Figure for various values of the scale $c$. We can see that a when $c=1.3$ the action sequence is much more reasonable for any physical system than the case where $c=20$, which is essentially like drawing samples from a uniform distribution. 
+
+
+\begin{figure}[t]
+	\centering
+%	\hspace{-5cm}
+      \begin{subfigure}[b]{0.45\columnwidth}
+
+    \includegraphics[clip=true,width=1.\textwidth]{figures/action_11.png}
+    \caption{Train}
+    \label{fig:train_results}
+  \end{subfigure}
+ % \hspace{5mm}
+  \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[clip=true,width=1.\textwidth]{figures/action_c20.png}
+    \caption{Test}
+    \label{fig:test_results}
+  \end{subfigure} 
+
+  %\vspace{-3mm}
+  \caption[Train and test set average cost difference, for 15 iterations.]{Train and test set average cost difference, for 15 iterations. Error bars represent standard error over four independent runs on shuffled versions of the data. (RLT$^*$-NC is RLT$^*$ without caching.)}
+  %\vspace{-3mm}
+  \label{fig:exploration}
+\end{figure}
+
+\subsection{Results}
+In this section our aim was to show that by using policy gradient RL methods we can learn a policy that can perform well both in terms of the initial SL policy and the specified reward function. We further claimed that if the reward function was reasonably close to the human prefereces in the demonstrations it will also allow the RL algorithm to learn better. In this section we document out results with respect to these aims. Our method named RL+SL is compated to cases where only one learning paradigm is used. The method named $RL_{only}$ uses reinforcement learning on the reward function above, while the method $SL_{only}$ only learns a policy using the demonstrations as in the previous section. We perform a comparison of these 3 methods both in terms of the cost function described above and in terms of the human demonstrations.
+
+\subsection{Comparison with RL}
+In this first comparison we use our SL policy as a starting point and then use the cost function described above to learn a new policy using RL. We compare this to learning using RL from scratch, i.e starting with a random policy and with usign the SL policy without any learning. Figure ?? plots the average reward over 10000 timesteps for each method. Figure ?? shows the histograms of rewards for batches of 10000 timesteps for each algorithm. We can see that there is a clear advantage to using SL+RL than any of the two methods on their own. This advantage comes both in terms of speed of learning as well as the convereged policy.
+
+\subsection{Comparison with SL}
+After using RL on the three policies we can go back and see how they perform on the supervised data. This can be done by simply measuring the total cross entropy loss for the whole demonstration dataset collected, without performing any learning. The results are summarised in Table ??, we can clearly see that...  
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
 \label{sec:conclusions}
@@ -682,6 +1025,6 @@ This deliverable has summarised our progress for Work Package 5 from month 15 of
 In terms of social conversation, there are three directions of future work we are currently pursuing, and for which we plan to report in month 36. Firstly, we aim to apply the methods for IRL that were here presented to the problem of learning social cost functions for social conversation from expert demonstrations of the interaction behaviors; Secondly, we aim to integrate the available cost functions in order to learn a single social conversation policy under which the robot operates. Finally, we aim to make the resulting policy more robust to false positives from the robots social detectors using advanced filtering techniques such as \emph{partially observable Markov decision processes} (POMDPs) and \emph{long-short memory networks} (LSTMs).
 
 \bibliographystyle{plain}
-\bibliography{references}
+\bibliography{references.bib}
 
 \end{document}
