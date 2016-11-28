@@ -149,6 +149,7 @@ Finally in Section ??, we describe a more theoretical approach to cost function 
 \section{Learning navigation cost functions from demosntration}
 \label{sec:rrt-iros}
 
+<<<<<<< HEAD
 In the previous deliverable D5.3, we proposed a new Inverse Reinforcement Learning method that allowed us to learn RRT* cost function from demonstrations. We named this method Rapidly Exploring Random Trees and we showed its effectiveness in navigation settings. In this section we report our progress in that direction. Firstly we review our background and method sections from the previous deliverable. We then go on to perform more thorough experiments in order to compare $RLT^*$ with the baseline method of maximum margin planning (MMP). Furthermore we show that our method can be effectively used to deal with kinodynamic constraints that a robot might have and we demonstrate that our method is much faster than simply using a naive implementation. Finally we apply the method to real data collected during the TERESA project in order to derive a cost function for navigation.
 
 
@@ -531,6 +532,521 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
 In this paper, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, it uses a caching scheme that greatly reduces the computational cost and improves performance. Our results in simulated social navigation scenarios show that RLT$^*$ achieves better performance at lower computational cost, even when there is a discrepancy between the features used for demonstration and learning. Furthermore, our results show that RLT$^*$ can handle more complex configuration spaces with motion constraints. Finally, we used RLT$^*$ to learn a cost function using data from real demonstrations from the TERESA robot and successfully deployed that cost function.
 
 In future work, we hope to extend RLT$^*$ to model how features evolve over time, in order to, e.g., consider people's movement during planning.  For complex social path planning applications, periodic replanning has been shown to help \cite{henry2010learning,vasquez2014inverse}. Replanning in RRT$^*$ is also possible \cite{otte2015rrtx} and could potentially be incorporated into RLT$*$.
+=======
+Learning from demonstration (LfD) \cite{argall2009survey} is of great interest to roboticists because it can circumvent tedious and often infeasible manual programming of complex behaviours. While most LfD methods rely on supervised learning (i.e., behavioural cloning) to directly learn policies, certain approaches, namely inverse optimal control (IOC) \cite{kalman1964linear} and inverse reinforcement learning (IRL) \cite{abbeel2004apprenticeship} instead learn \emph{cost functions} from demonstration, which are then used to \emph{plan} the robot's behaviour. 
+
+In addition, learned cost functions are often useful even when the environment changes.  For example, if the friction in a robot's wheels changes due to wear and tear, the optimal policy will change but the cost function will not. Thus, a robot trained via supervised learning would need to learn a new policy, while a robot trained via IRL could simply replan on the new dynamics with its existing cost function. In addition, cost functions are thought to be more succinct representations of the aims of the agent \cite{abbeel2004apprenticeship}. For example, a robot whose aim is to reach a goal as fast as possible may have a simple cost function but a complex policy. 
+
+IRL is an iterative process that, in an inner loop, solves the forward planning problem (i.e., finds an optimal policy under the current cost function) and subsequently, in an outer loop, updates the current cost function. This process repeats until convergence. For continuous domains such as robotics, solving the planning problem exactly is typically intractable. Doing so may result in high-dimensional models to which most planning algorithms scale poorly, necessitating a coarse discretisation that yields poor performance.  Consequently, in robotics, planning is often done using sample-based, single-query motion planners such as Rapidly Exploring Random Trees (RRTs) \cite{lavalle1998rapidly} and their variants \cite{karaman2011sampling}. Such methods can cope with high-dimensional continuous domains, as well as the presence of obstacles in the environment and motion constraints on the robot.
+
+
+In this paper, we first propose Approximate Maximum Margin Planning (AMMP), a variant of Maximum Margin Planning (MMP) \cite{ratliff2006maximum} that does not assume an optimal planner. Doing so allows us to use sample-based planning algorithms, such as RRT$^*$ in the inner loop of IRL. Second, we propose a caching scheme that both improves performance and reduces the computational cost when RRT$^*$ is used within AMMP. The resulting algorithm, which we call Rapidly Exploring Learning Trees (RLT$^*$),  allows computationally efficient IRL in high-dimensional, continuous domains with obstacles and motion constraints. 
+
+We evaluate RLT$^*$ on real and simulated data from a social navigation scenario. The results demonstrate that, in the absence of obstacles and motion constraints, RLT$^*$ performs better and is faster than both MMP and RLT$^*$ without caching. Furthermore, we show that RLT$^*$, unlike MMP, can learn cost functions in robotic tasks with obstacles and motion constraints. Finally, we deploy our method on a real telepresence robot using data from human demonstrations.
+
+\subsubsection{Related Work \label{sec:related_work}}
+
+
+Substantial research has applied IRL to robotics \cite{henry2010learning,abbeel2008apprenticeship,vasquez2014inverse}.
+A big challenge in doing so is solving the forward planning problem under the current cost function at every iteration. The planning problem is especially intractable in robotics because the state-action spaces encountered are often continuous and high dimensional. 
+One approach is to discretise the state-action spaces and solve the resulting Markov decision process (MDP). However, in high-dimensional tasks, fine discretisations render planning intractable and coarse discretisations yield poor performance.
+
+Some methods that use discretisation formulate the problem such that only an open-loop path (rather than a closed-loop policy) is required. Then, given deterministic dynamics, planning can be performed using A$^*$ \cite{ratliff2006maximum}, allowing realistic problems to be tackled. We take a similar approach but, by planning using RRT$^*$, we substantially enlarge the class of tasks that can be tackled.
+
+Another approach is to use hybrid planners. Inverse Optimal Heuristic Control \cite{ratliff2009inverse} models the long-term goals of the agent as a coarsely discretised MDP, to ensure tractability, while using supervised learning to determine the local policy of the agent at each state. Graph-Based IOC \cite{byravan2015graph} uses discrete optimal control on a coarse graph and the actual path is executed using local trajectory optimisation techniques such as CHOMP \cite{ratliff2009chomp}, which would otherwise suffer from local minima. However, these methods employ complex and domain-specific planning formulations that are not suitable for all robotics tasks. By contrast, our approach employs a widely used planner, making it versatile and easy to implement. 
+
+Another recent method is Adaptive State Graphs \cite{okallearning}, which builds a state-action controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn the underlying cost function is different from the one used to execute the robot's behaviour. This can have adverse effects since IRL  assumes that the demonstration paths came from the same planner used during learning.  Instead of building a controller graph first and then using a different controller to optimise trajectories, RLT$^*$ builds a controller tree on the fly and uses the same planner for learning and execution.
+
+All of the above methods require a model of the dynamics of the system. Another paradigm, that of model-free IRL, avoids the need to explicitly plan, employing sampling instead. As a result it tends to scale better to high-dimensional state-action spaces and does not require a model of the system dynamics, \cite{boularias2011relative,kalakrishnan2013learning}.
+ Model free IRL samples trajectories, usually starting from the initial conditions observed in the data. The probability of these trajectories is weighted according to the current cost function, which is then updated to make trajectories closer to the data more likely. A big challenge is to find an appropriate importance distribution at each iteration. \cite{finn2016guided} considers guiding the importance distribution by simultaneously learning a good policy under the current cost function and using it as an adaptive importance sampler. However, since it uses a modified version of Linear Quadratic Regulator control the derived policies are only locally optimal and can produce highly suboptimal paths or even fail in the presence of obstacles. By contrast, RRTs cope naturally with obstacles, as long as they are static and mapped, and is also asymptotically optimal.
+
+\subsection{Background}
+We begin with background on path planning and inverse reinforcement learning for path planning.
+
+\subsubsection{Path Planning \label{subsec:path_planning}}
+Path planning occurs in a space $\mathcal{S}$ of possible robot configurations. A configuration $s \in \mathcal{S}$ is usually continuous, and often represents spatial quantities such as position and orientation. A path planner seeks an obstacle-free path $\zeta_{o,g} = (s_1,s_2,s_3$ $\ldots,s_{l_{\zeta}}) $ of length $l_{\zeta}$, from an initial configuration $o = s_1$ to a goal configuration  $g =s_{l_{\zeta}}$. When the initial and goal configurations are implied, we refer to a path as $\zeta$.
+
+As there could be several paths to the goal, planners often employ a \emph{cost functional}, $C(\zeta)$, which typically sums the costs between two subsequent configurations $c(s_i,s_j)$:
+\begin{equation}
+	C(\zeta) = \sum_{i=1}^{l_{\zeta}-1} c(s_i,s_{i+1}).
+\end{equation}
+This cost functional is similar to the one used in optimal control and analogous to the return used in reinforcement learning. Given the cost functional, the path planner seeks an optimal path $\zeta^*$, which satisfies,
+\begin{equation}
+ 	\zeta^*_{o,g} = \argmin_{\zeta_{o,g} \in Z_{o,g}} C(\zeta), \label{eq:back_plan}
+\end{equation}
+where $Z_{o,g}$ is the set of possible paths such that $s_1 = o, s_{l_\zeta} = g$. Many path planning algorithms discretise $\mathcal{S}$ and use graph search algorithms like A$^*$ to find the optimal path. Under mild assumptions, these approaches are guaranteed to find the best path on the graph, therefore solving \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$, whose size depends on the discretisation. However, such methods scale poorly in the size of $\mathcal{S}$. Furthermore, such algorithms ignore motion constraints as they assume all nodes in the graph can be reached by their neighbours in exactly the same way. This assumption does not hold, e.g., for non-holonomic robots, where the ortientation at each node places constraints on how it can be reached. In this constrained space, it is less straightforward to define actions, neighbouring nodes, or an admissible heuristic, which is necessary for optimality.
+
+These drawbacks motivate \emph{sample-based} path planning algorithms such as RRT$^*$  \cite{karaman2011sampling}. Instead of building a graph and then searching it, RRT$^*$ builds a tree on the fly and keeps track of the current best path. The algorithm consists of two interleaved steps. 
+
+The first step is \emph{sampling}. A random point $s_{rand}$ is sampled from the configuration space. Next, the closest point $s_{closest}$, already in the existing vertex set $V$ is determined and a new point $s_{new}$ is created by \emph{steering} from  $s_{closest}$ to $s_{rand}$. In a Euclidean space, steering between two points means simply connecting them with a straight line. However, if orientations and motion constraints are used, then becomes more complex. Finally, the sampling step determines the points, $S_{near}$, within a given radius of $s_{new}$.
+
+The second step is \emph{rewiring}, which determines which points in $S_{near}$ we should connect to $s_{new}$, i.e., it determines which path to $s_{new}$ results in a lowest cost path. Finally, we repeat this step for the parents of $S_{near}$. Thus, the tree is rewired locally around the new point, such that lower global cost paths arise.
+
+Alternating between these two steps for a given time budget $T$ solves \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g}$ that is determined by the randomly sampled points. As $T \rightarrow \infty$, RRT$^*$ minimises over the entire $Z_{o,g}$, i.e., it is asymptotically optimal in time \cite{karaman2011sampling}. By contrast, A$^*$ is asymptotically optimal in resolution.
+
+
+\subsubsection{IRL for Path Planning \label{subsec:inverse_problem}}
+In path planning, we are given a cost function and must find a (near) optimal path to the goal. In the inverse problem, we are given example paths and must find the cost function for which these paths are (near) optimal.  The example paths comprise a dataset $\mathcal{D} = (\zeta^1_{o_1,g_1},\zeta^2_{o_2,g_2}...\zeta^D_{o_D,g_D})$ where $\zeta^i_{o_i,g_i}$ is an example path with initial and final configurations $o_i$ and $g_i$. We assume the unknown cost function is of the form,
+\begin{equation}
+	c(s_i,s_j) = \mathbf{w}^T \mathbf{f}(s_i,s_j), \label{eq:inner_prod}
+\end{equation}
+where $\mathbf{f}(s_i,s_j)$ is a $K$-dimensional vector of features that encode different aspects of the configuration pair and $\mathbf{w}$ is a vector of unknown weights to be learned. Since $\mathbf{w}$ is independent of the configuration, we can express the total cost of the path in a parametric form:
+
+\begin{equation}
+	C(\zeta) = \mathbf{w}^T\sum_{i=0}^{l_{\zeta}-1} \mathbf{f}(s_i,s_{i+1}) := \mathbf{w}^T \mathbf{F}(\zeta),
+\end{equation}
+where $\mathbf{F}(\zeta)$ is the \emph{feature sum} of the path.
+
+While many formulations of the inverse problem exist, the general idea is to find a weight vector that assigns less cost to the example paths than all other possible paths with the same initial and goal configuration.  This can be formalised by a set of inequality constraints:
+
+\begin{equation}
+	C(\zeta^i_{o_i,g_i}) \leq  C(\zeta) \quad \forall \zeta \in Z_{o_i,g_i}  \quad \forall i. \label{eq:const1}
+\end{equation}
+The constraint is an inequality because $Z_{o_i,g_i}$ contains only paths available to the planner and thus may not include the example path $\zeta^i_{o_i,g_i}$.
+$Z_{o_i,g_i}$ can be large but if we have an optimisation procedure that solves \eqref{eq:back_plan}, it is enough to satisfy, 
+\begin{equation}
+	C(\zeta^i_{o_i,g_i}) \leq \min_{\zeta \in Z_{o_i,g_i}} C(\zeta) \quad \forall i. \label{eq:const}
+\end{equation}
+
+Maximum Margin Planning (MMP) \cite{ratliff2006maximum} introduces a margin function $L_i(\zeta)$ that decreases the cost of the proposed path $\zeta$ if it is dissimilar to $\zeta^i_{o_i,g_i}$. For example, $L_i(\zeta)$ could be $-1$ times the number of configurations in the demonstration path not visited by $\zeta$. As in Support Vector Machines, requiring the model to fit the data well even in the presence of a margin improves generalisation. Furthermore, the margin helps address the ill-posed nature of IRL, i.e., many cost functions are consistent with the demonstrated behaviour. Formally, MMP solves the following optimisation problem:
+\begin{equation}
+	\argmin_{\mathbf{w},\tau} \frac{1}{2}||\mathbf{w}||^2 + \frac{\lambda}{D} \sum_i \tau_i \label{eq:mas_marg}
+\end{equation}
+\begin{equation}
+	\text{s.t.} \quad C(\zeta^i_{o_i,g_i}) - \tau_i \leq \min_{\zeta \in Z_{o_i,g_i}} C(\zeta) + L_i(\zeta) \quad \forall i,
+\end{equation}
+where $\tau_i$ are slacks that can be used to relax the constraints. Rearranging the inequality in terms of the slacks yields:
+
+\begin{equation}
+	 \quad C(\zeta^i_{o_i,g_i}) - \min_{\zeta \in Z_{o_i,g_i}} C(\zeta) + L_i(\zeta)  \leq \tau_i  \quad \forall i.
+\end{equation}
+Consequently, the $\mathbf{w}$ minimising:
+\begin{equation}
+	\frac{1}{2}||\mathbf{w}||^2 + \frac{\lambda}{D} \sum_i \big( C(\zeta^i_{o_i,g_i}) - \min_{\zeta \in Z_{o_i,g_i}}\big(C(\zeta) + L_i(\zeta)\big) \big) \big. \label{eq:unconstrained}
+\end{equation}
+also minimises \eqref{eq:mas_marg}, i.e., the slacks are tight.
+The minimum can be found by computing a subgradient and performing gradient descent on the above objective:
+\begin{equation}
+	\nabla_{\mathbf{w}} =\mathbf{w} +  \frac{\lambda}{D} \sum_{i=0}^D F(\zeta^i_{o_i,g_i}) - F(\tilde{\zeta}^*_{o_i,g_i}), \label{eq:update1}
+\end{equation}
+where,
+\begin{equation}
+	\tilde{\zeta}^*_{o_i,g_i} = \argmin_{\zeta \in Z_{o_i,g_i}} C(\zeta) + L_i(\zeta). \label{eq:augmented_max}
+\end{equation}
+
+The inverse problem can therefore be seen as an iterative procedure that first solves \eqref{eq:augmented_max} in the inner loop while keeping the weights constant. Given that solution, it then updates the weights using \eqref{eq:update1} in the outer loop. The weights at convergence represent the cost function that is used to plan future behaviour. In \cite{ratliff2006maximum}, A$^*$ search was used for planning in the inner loop, assuming that the domain contained acyclic positive costs. In this paper, we make the same assumptions but develop methods that use RRT$^*$ for planning.
+
+\subsection{Method}
+	In this section, we propose Rapidly Exploring Learning Trees (RLT$^*$).  We first propose a generic extension to MMP that we call Approximate Maximum Margin Planning.  We then show how an implementation of this approach with an RRT$^*$ planner and a novel caching scheme yields RLT$^*$.
+
+	\subsection{Approximate Maximum Margin Planning \label{subsec:ammp}}
+
+Section \ref{subsec:inverse_problem} shows how the multiple constraints of \eqref{eq:const1} can be reduced to the single constraint of \eqref{eq:const} for each demonstration. However, this reduction requires an optimal planner to perform the minimisation in \eqref{eq:const1}, which is impractical in many robot applications. Suppose instead that, as in RRT$^*$, we have a mechanism for sampling different paths from $Z_{o,g}$ along with their respective costs and that, for a given finite time budget $T$, this path sampler samples a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$,  Then, we can modify \eqref{eq:const} to demand that our cost function satisfies,
+\begin{equation}
+	C(\zeta^i_{o_i,g_i}) \leq \min_{\zeta_{o_i,g_i} \in \tilde{Z}_{o_i,g_i}} C(\zeta) \quad \forall i. \label{eq:const_rrt}
+\end{equation}
+	As $T$ increases, lower cost paths are sampled, making this inequality harder to satisfy. Assuming $\tilde{Z}_{o_i,g_i}$ is constant, we can rewrite \eqref{eq:unconstrained} as:
+
+	\begin{equation} \frac{1}{2}||\mathbf{w}||^2 + \frac{\lambda}{D} \sum_i \big( C(\zeta^i_{o_i,g_i}) - \min_{\zeta \in \tilde{Z}_{o_i,g_i}}\big(C(\zeta) + L_i(\zeta)\big) \big). \label{eq:unconstrained_rrt}
+	\end{equation}
+This gives rise to an approach we call Approximate Maximum Margin Planning (AMMP). It is similar  to MMP with the crucial difference that the planning step is executed by a sample-based planner and not a deterministic one, like A$^*$. An important consequence is that $\tilde{Z}_{o_i,g_i}$ changes every time we invoke the sample-based planner. Thus, AMMP can be thought of as sampling the \emph{constraints} that we want our cost function to satisfy. The main advantage of AMMP is that it is not bound by the restrictive assumptions of  A$^*$, such as a discrete state-action space and no motion constraints. 
+
+However, an ineffective sampler could yield poor gradient estimates and thus poor solutions. In fact, Ratliff et al.\ \cite{ratliff2009chomp} argue that, for this reason, sample-based planners like RRT are not suited to learning cost functions from demonstration, as the paths sampled by RRT are heavily biased during the sampling process and thus highly suboptimal. However, asymptotically optimal sample-based planners like RRT$^*$ are better able to plan low-cost paths \cite{karaman2011sampling} and thus well suited for use within AMMP.
+
+\subsubsection{Rapidly Exploring Learning Trees \label{subsec:cached}}
+
+As suggested above, a simple way implement AMMP is to use RRT$^*$ as the sample-based planner.  RRT$^*$ can sample low-cost paths, allowing AMMP to learn a good cost function. Furthermore, RRT$^*$ can cope with large and continuous state-action spaces with motion constraints. However, the result is a computationally expensive algorithm that calls the planner $I\times|D|$ times over $I$ iterations, given a dataset of size $|D|$. Furthermore, sampling a separate set of points at every iteration could produce noisy gradients that negatively affect convergence. In this section, we propose Rapidly Exploring Learning Trees (RLT$^*$), which implements AMMP with an RRT$^*$ planner using a novel caching scheme to ensure both computational efficiency and more consistent gradients.
+
+A key observation is that, in RRT$^*$, only the rewiring step depends on the cost function.  The sampling step is independent of it and, especially when motion constraints are present, contains the most computationally expensive operations. These are: 1) fitting and querying a data structure to find the nearest neighbour and the radius neighbours to a newly sampled point, 2) applying the steer function to all neighbours to and from the newly sampled point, and 3) checking for obstacles in these paths. By contrast,  the only potentially expensive operation in the rewiring step is querying the cost of an edge. 
+
+Therefore, a key idea behind RLT$^*$ is to perform the sampling step just once for each data point and cache it for reuse throughout learning. Then, at each iteration, only the rewiring step needs to be repeated as the cost function changes.
+
+Algorithm \ref{alg:rrt_cache} describes the caching step, which takes as input $p$, the number of points to randomly sample from free space; $s_{init}$, the initial point; and $\eta$, the steer step size. For each randomly sampled point $s_{rand}$, we find the nearest neighbour, $s_{nearest}$, from the set of points in the vertex set $V$. We then create a new configuration point $s_{new}$ by steering from $s_{nearest}$ to $s_{rand}$. Next, we query the radius neighbours, $S_{near}$, of $s_{new}$ at a radius determined by  $\min\{\gamma_{RRT^*}(\frac{\log(|V|)}{|V|})^{\frac{1}{d}},\eta\}$. Here, $d$ is the dimensionality of $S$, and $\gamma_{RRT^*}$ is a constant based on the volume of free space (see \cite{karaman2011sampling}).  Next, we determine which points in $S_{near}$ can safely reach $s_{new}$ through the chosen \texttt{Steer} function (lines 13-17). These forward paths are stored in $Paths_{fwd}$. We then perform the same procedure but this time checking the paths from $s_{new}$ to $S_{near}$ and store them in the set $Paths_{bwd}$ (lines 18-22). This algorithm turns the sampling process of RRT$^*$  into a preprocessing step. Consequently, the expensive \texttt{Nearest}, \texttt{Near}, \texttt{Steer} and \texttt{Safe} procedures only need to be repeated $|D|$ times instead of $I\times|D|$ times.
+
+
+	\begin{algorithm}
+	 \algsetup{linenosize=\tiny}
+ 	\scriptsize
+	\caption{\small \texttt{cacheRRT}($n$,$s_{init}$,$\eta$)}
+	\label{alg:rrt_cache}
+	\begin{algorithmic}[1]
+	\STATE $P \gets \emptyset$ \hfill \COMMENT{Initialise the point cache}
+	\STATE $V \gets {s_{init}}$
+	\FOR{$i=0 \dots n $}
+	\STATE $s_{rand} \gets SampleFree_i$
+	\STATE $s_{nearest} \gets \texttt{Nearest}(V,s_{rand})$
+	\STATE $s_{new} \gets \texttt{Get}(s_{nearest},s_{rand})$
+	\STATE $S_{near} \gets \texttt{Near}(V,{s_{new}},\min\{\gamma_{RRT^*}(\frac{\log(|V|)}{|V|})^{\frac{1}{d}},\eta\})$
+	\STATE $Paths_{fwd} \gets \emptyset$
+	\STATE $Paths_{bwd} \gets \emptyset$
+	\STATE $S_{fwd} \gets \emptyset$
+	\STATE $S_{bwd} \gets \emptyset$
+	\FOR{$s_{near} \dots S_{near}$}
+	\STATE $path_{fwd} = \texttt{Steer}(s_{near},s_{new})$
+	\IF{$\texttt{Safe}(path_{fwd})$}
+	\STATE $Paths_{fwd} \gets Paths_{fwd} \cup path_{fwd}$
+	\STATE $S_{fwd} \gets S_{fwd} \cup s_{near}$
+	\ENDIF
+	\STATE $path_{bwd} = \texttt{Steer}(s_{new},s_{near})$
+	\IF{$\texttt{Safe}(path_{bwd})$}
+	\STATE $Paths_{bwd} \gets Paths_{bwd} \cup path_{bwd}$
+	\STATE $S_{bwd} \gets S_{bwd} \cup s_{near}$
+	\ENDIF
+	\ENDFOR
+	\STATE $V\gets V \cup s_{new}$
+	\STATE $P \gets P \cup \{s_{nearest},s_{new},S_{fwd},S_{bwd},Paths_{fwd},Paths_{bwd}\}$
+	\ENDFOR
+	\RETURN $P$
+	\end{algorithmic}
+
+	\end{algorithm}
+
+
+The output of Algorithm \ref{alg:rrt_cache} is input to Algorithm \ref{alg:plan_cached}, which resembles the rewiring procedure in RRT$^*$ \cite{karaman2011sampling} and returns a low-cost path to the goal. However, unlike RRT$^*$ rewiring, the vertices of the tree and their neighbours at each iteration are already known and contained within the point cache. This speeds computation while keeping consistency between the planners used during learning and final execution. As learning proceeds and the cost function changes, so does the wiring of this tree; however, the points involved do not change. %Note that, despite caching, Algorithms \ref{alg:rrt_cache} and \ref{alg:plan_cached} are consistent with the planning procedure of the RRT$^*$. Consequently, there is no discrepancy between the planner used during learning and execution.
+
+Algorithm \ref{alg:ammp} describes Rapidly Exploring Learning Trees (RLT$^*$), which uses Algorithms \ref{alg:rrt_cache} and \ref{alg:plan_cached}. First, we initialise the weights, either randomly or using a cost function that simply favours shortest paths. Then, for each datapoint $\zeta_i$, we calculate feature sums and run \texttt{cacheRRT}. The main learning loop involves cycling through all data points and finding the best path under a loss-augmented cost function. The feature sums of this path are calculated and subsequently the difference with the demonstrated feature sums is computed. At the end of each iteration, an average gradient is calculated and the cost function is updated. At convergence, the learned weights are returned.
+
+In addition to saving computation time, the use of caching encourages consistency between the gradients computed in each iteration, as they are estimated from the same sampled points.  The effect on the gradients, which resembles that of momentum \cite{polyak1964some}, can improve performance, as our results in the next section show.
+
+	\begin{algorithm}
+	\algsetup{linenosize=\tiny}
+ 	\scriptsize
+	\caption{\texttt{planCachedRRT$^*$}($P$,$s_{init}$,$c()$)}
+	 \label{alg:plan_cached}
+	\begin{algorithmic}[1]
+	\STATE $E \gets \emptyset$
+	\STATE $V \gets {s_{init}}$
+	\FOR{$i=0 \dots |P| $}
+	\STATE $(s_{nearest},s_{new}) \gets P_i$
+	\STATE $(S_{fwd},S_{bwd}) \gets P_i$
+	\STATE $(Paths_{bwd},Paths_{fwd}) \gets P_i$
+	\STATE $V\gets V \cup s_{new}$
+	\STATE $s_{min}\gets s_{nearest}$
+	\STATE $c_{min}\gets \texttt{Cost}(s_{nearest}) + c(path_{s_{nearest},s_{new}})$
+	%\FOR{$s_{fwd} \in S_{fwd} $}
+	\FOR{$j=0 \dots |S_{fwd}| $}
+	\STATE $s_{fwd} = S^j_{fwd}$
+	\STATE $path_{fwd} = Paths^j_{fwd}$  
+	\STATE $C_{near} \gets \texttt{Cost}(s_{fwd}) + c(path_{fwd})$
+	\IF { $C_{near}<c_{new}$}
+	\STATE $s_{min} \gets s_{fwd}; c_{min}\gets c_{near}$
+	\ENDIF
+	\ENDFOR
+	\STATE $E \gets E \cup \{(s_{min},s_{new})\} $
+	%\FOR{$s_{bwd} \in S_{bwd} $}
+	\FOR{$j=0 \dots |S_{bwd}| $}
+	\STATE $s_{bwd} = S^j_{bwd}$
+	\STATE $path_{bwd} = Paths^j_{bwd}$
+	\STATE $C_{new} \gets \texttt{Cost}(s_{new}) + c(path_{bwd})$
+	\IF {$C_{new}<\texttt{Cost}(s_{near})$}
+	\STATE $s_{parent} \gets \texttt{Parent}(s_{bwd})$
+	\STATE $E \gets E  \smallsetminus {(s_{parent},s_{bwd})} \cup {(s_{new},s_{bwd})} $
+	\ENDIF
+	\ENDFOR
+	\ENDFOR
+	\STATE $\zeta_{min} \gets \texttt{minCostPath}(V,E,c())$
+	\RETURN $\zeta_{min}$
+	\end{algorithmic}
+	\end{algorithm}
+
+
+
+	\begin{algorithm}
+	 \algsetup{linenosize=\tiny}
+  	\scriptsize
+	\caption{\texttt{RLT$^*$}($D,p,\eta,\lambda,\delta$)\label{alg:ammp}}
+	\begin{algorithmic}[1]
+	\STATE $\mathbf{w} \gets \texttt{initialiseWeights}$
+	\STATE $\mathbf{\tilde{F}} \gets \emptyset$
+	\STATE $R \gets \emptyset$
+	\FOR{$\zeta^i \text{ in } D$}
+	\STATE $\tilde{F}_{\zeta^i} \gets \texttt{FeatureSums}(\zeta^i)$
+	\STATE $\mathbf{\tilde{F}} \gets \mathbf{\tilde{F}} \cup \tilde{F}_{\zeta^i}$
+	\STATE $r_i \gets \texttt{cacheRRT}(p,s_{init}^{\zeta^i},\eta)$
+	\STATE $R \gets R \cup r_i $
+	\ENDFOR
+	\REPEAT
+	\STATE $\nabla_{\mathbf{w}}\gets 0$
+	\FOR{$ \zeta^i \text{in } D $}
+	\STATE $c() \gets \texttt{getCostmap}(\mathbf{w}) + L(\zeta^i)$ 
+	\STATE $r_i \gets R\{i\}$ ;	$\tilde{F}_i \gets \mathbf{\tilde{F}}\{i\}$ 
+	\STATE $\zeta \gets \texttt{planCachedRRT}^*(r_i,x^i_{init},c())$
+	\STATE $F_i \gets \texttt{FeatureSums}(\zeta)$
+	\STATE $\nabla_{\mathbf{w}} \gets \nabla_{\mathbf{w}} + \tilde{F}_i - F_i $
+	\ENDFOR
+	\STATE $\nabla_{\mathbf{w}} \gets \mathbf{w} + \frac{\lambda}{|D|}\nabla_{\mathbf{w}} $
+	\STATE $\mathbf{w} \gets \mathbf{w} - \delta\nabla_{\mathbf{w}} $
+	\UNTIL{convergence}
+	\RETURN $\mathbf{w}$
+
+	\end{algorithmic}
+	\end{algorithm}
+
+	% \STATE $\widetilde{\mu}^{\mathcal{D}} \gets \mathtt{empiricalFE}(\mathcal{D})$\hfill \COMMENT{using \eqref{eqn:empirical_fe}}
+	% \STATE $\widetilde{\mu}^{\mathcal{F}} \gets \mathtt{empiricalFE}(\mathcal{F})$ 
+	% \STATE $P_{\mathcal{D}}^{s_1} \gets \mathtt{initialStateDistribution}(\mathcal{D})$
+	% \STATE $P_{\mathcal{F}}^{s_1} \gets \mathtt{initialStateDistribution}(\mathcal{F})$
+	% \STATE $w^{\mathcal{F}}_k\gets 0\quad\forall k\in\{1,\ldots,K\}$
+	% \REPEAT
+	% \STATE $R(s,a) \gets (w^{\mathcal{D}}+w^{\mathcal{F}})^T\phi(s,a)\quad\forall s\in\mathcal{S},a\in\mathcal{A}$
+	% \STATE $\pi \gets \mathtt{softPlan}(\mathcal{S},\mathcal{A},T,R)$\hfill\COMMENT{using \eqref{eq:soft_backup}}
+	% \STATE $\mu^\pi|_{\mathcal{D}} = \mathtt{calculateFE}(\pi,T,P_{\mathcal{D}}^{s_1})$
+	% \STATE $\mu^\pi|_{\mathcal{F}} = \mathtt{calculateFE}(\pi,T,P_{\mathcal{F}}^{s_1})$
+	% \STATE $w^{\mathcal{D}} \leftarrow w^{\mathcal{D}} - \alpha (\mu^\pi|_{\mathcal{D}} - \widetilde{\mu}^{\mathcal{D}})$
+	% \STATE $w^{\mathcal{F}} \leftarrow \frac{(\mu^\pi|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}})}{\lambda}$
+
+	% \IF {$\lambda > \lambda_{min}$}
+	% \STATE $\lambda \leftarrow \alpha_{\lambda}\lambda$
+	% \ENDIF
+	% \UNTIL{convergence}
+	% \RETURN $R,\pi$
+
+
+For RRT$^*$, the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is hard to quantify since it depends on the size and nature of $S$ as well as the cost function we are using, which also changes with every iteration. For this reason, we resort to an experimental assessment of the ability of RRT$^*$ to sample the right constraints at every iteration of RLT$^*$ and hence effectively learn a cost function from demonstration.
+
+\subsection{Experiments}
+
+We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, and RLT$^*$-NC, an ablated version of RLT$^*$ that does not use caching.  We consider three experimental settings: 1) a simulated holonomic robot, 2) a simulated non-holonomic robot, and 3) a real telepresence robot.
+	
+	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{henry2010learning,vasquez2014inverse,okallearning} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
+	
+	\subsubsection{Simulated Experiments}
+	We first consider randomly generated social environments in simulation, such as the one shown in Figure \ref{fig:exp_setting}. Each arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task is to use $D$ to extract a cost function that enables socially intelligent behaviour.
+
+	\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+      \begin{subfigure}[b]{0.35\columnwidth}
+    \includegraphics[scale = 0.15]{figures/no_cf.png}
+    \caption{Example setting }
+    \label{fig:exp_setting}
+  \end{subfigure}
+  \hspace{10mm}
+  \begin{subfigure}[b]{0.35\columnwidth}
+  \hspace{4mm}
+    \includegraphics[scale = 0.15]{figures/cf.png}
+    \caption{Cost function}
+    \label{fig:cost_f}
+  \end{subfigure} 
+
+  %\vspace{-3mm}
+  \caption{(a) A randomised instance of the social navigation task. Arrows denote the position and orientation of people in the scene. The robot is represented by the magenta box and the goal location is represented by the green box. (b) The corresponding cost function. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
+
+    \vspace{-2mm}
+
+  %\vspace{-3mm}
+  \label{fig:setting}
+  \end{figure}
+
+	The features we use can be divided into three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two variations, for reasons explained in the following section.
+	\begin{itemize}
+		\item {\bf Social feature set 1 (S1)}: Three isotropic Gaussian functions with different means, centred in front, behind, and on the person.
+		\item {\bf Social feature set 2 (S2)}: Three field-of-view features. The features have a value of 1 if the robot is within a certain distance and angle from the person.
+	\end{itemize}
+	  The second category of features encodes the distance from the target location using linear, exponential, and logarithmic functions. The third category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modelling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
+
+
+
+% 	\begin{figure}[tbh]
+% %	\hspace{-5cm}
+% 	\centering
+%       \begin{subfigure}[b]{0.42\columnwidth}
+%     \includegraphics[scale=0.2]{images/person_feat2.png}
+%     \caption{Social feature set S1.}
+%     \label{fig:S1}
+%   \end{subfigure}
+%   \hspace{10mm}
+%   \begin{subfigure}[b]{0.42\columnwidth}
+%   \hspace{4mm}
+%     \includegraphics[scale=0.2]{images/person_feat1.png}
+%     \caption{Social feature set S2}
+%     \label{fig:S2}
+%   \end{subfigure} 
+%   %\vspace{-3mm}
+%   \caption{Cost functions resulting from linear combinations of the social featuresets. Figure \ref{fig:S1} demonstrates featureset 1. It consists of three isotropic Gaussian functions centered in front in the center and behind the person. Figure \ref{fig:S2} shows the field-of-view features of featureset S2. \sw{I have no idea what these plots are showing.} \ks{Now?}}
+%     \vspace{-2mm}
+%   %\vspace{-3mm}
+%   \label{fig:setting}
+%   \end{figure}
+
+
+	\subsubsection{Evaluation}
+
+	To evaluate our algorithms, we generate a dataset $D$ by planning near-optimal paths from initial configurations $s_o$ to goal configurations $s_g$ under a ground-truth cost function $c_{gt}()$ derived from ground-truth weights $\mathbf{w}_{gt}$ and features $\mathbf{F}_{gt}$. A fully optimal path can only be derived asymptotically in terms of either time  for RRT$^*$, or resolution for A$^*$. In practice, however, we found that planning for 100 seconds using  RRT$^*$  achieves a path that is nearly optimal; running longer leads to negligible changes in path cost. 
+	The resulting ground truth dataset enables a quantatitive empirical evaluation, which is otherwise problematic in IRL \cite{vasquez2014inverse,shiarlis2016inverse}. For each path $\zeta$ generated by the learning algorithm, we know its cost under the ground-truth cost function and features is simply  $\mathbf{w}_{gt}^T\mathbf{F}_{gt}(\zeta)$. Furthermore, we can compute the \emph{cost difference} between the learned path and the demonstrated path with respect to ground truth:
+	\begin{equation}
+		Q(\zeta,\zeta_i,\mathbf{w}_{gt}) = \mathbf{w}_{gt}^T(\mathbf{F}_{gt}(\zeta)-\mathbf{F}_{gt}(\zeta_i)), \label{eq:obj_eval}
+	\end{equation}
+which is our primary performance metric.  Note that, if the demonstration path $\zeta_i$ is optimal under $\mathbf{w}_{gt}$, then $Q(\zeta,\zeta_i,\mathbf{w}_{gt}) \geq 0$. For our holonomic simulated experiments, we consider two learning scenarios.
+\begin{enumerate}
+	\item \textbf{Unknown weights}: only $\mathbf{w}_{gt}$ is unknown. The demonstrations and the learning algorithm share social feature set S1.
+	\item \textbf{Unknown weights and features}: $\mathbf{w}_{gt}$ and $\mathbf{F}_{gt}$  are unknown. S2 is used to generate the demonstrations and S1 is used for learning.
+\end{enumerate}
+
+The first scenario evaluates each algorithm's ability to learn good cost functions when provided only with limited demonstrations of the task. The second scenario introduces a feature discrepancy to better simulate real-world settings, since it is unlikely that the features we define will exactly match those implicitly used by the human demonstrator.
+% In both cases the ground-truth weights $\mathbf{w}_{gt}$ were chosen to induce a cost function that penalises passing in front of people. In addition, small weights were added to the person related features, as well as linear and exponential penalisation of the distance from the goal, so that the cost functions would not be too trivial. 
+
+We also document the total learning time for K iterations for the algorithms under comparison.  All algorithms were implemented in Python, share similar functions, and were not optimised for speed apart from the caching scheme in RLT$^*$. Finally, we perform a qualitative evaluation by visually comparing the learned cost functions for each algorithm and the paths they generate against ground truth.
+
+	\subsubsection{Holonomic Robot Results}
+
+	Our dataset $D$ consists of 20 trajectories from random social social situations. We split $D$ into $D_{train}$ and $D_{test}$, each with 10 trajectories. After training on $D_{train}$, the cost difference of a cost function is evaluated on $D_{test}$ using \eqref{eq:obj_eval}. The process is repeated 7 times for the same dataset but with different random compositions of $D_{train}$ and $D_{test}$.  All learning algorithms are initialised using the same cost function that only favours shortest paths.
+	
+	As mentioned earlier, planning time and grid resolution affect the performance of RRT$^*$ and $A^*$, respectively. To make a fair comparison, we vary these two quantities for each algorithm and plot cost difference against learning time at each setting.  We can then identify which algorithms at which settings comprise the Pareto front, i.e., are undominated with respect to cost difference and learning time.
+	
+	 Figures \ref{fig:res_sim1} and \ref{fig:res_sim2} show the results for the two scenarios described earlier. MMP\_X (green) refers to MMP with X meters of grid resolution while  RLT\_X (red) and RLT$^*$-NC\_X (blue) refer to RLT and RLT without caching, respectively, with X seconds of planning. The shading represents an interpolation of the performance between settings for each method. In this way an area of single colour illustrates hypothesized domination of that method over another, given the same amount of time. Since lower is better for both cost difference and learning time, the closer a point is to the bottom left corner, the better.
+
+	\begin{figure}[tbh]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\hspace{-1cm}
+      \begin{subfigure}[b]{0.41\columnwidth}
+    \includegraphics[scale=0.21]{figures/pf_same.png}
+    \caption{Unknown weights scenario.}
+    \label{fig:res_sim1}
+  \end{subfigure}
+     	\hspace{10mm}
+  \begin{subfigure}[b]{0.41\columnwidth}
+
+    \includegraphics[scale=0.21]{figures/pf_different.png}
+    \caption{Unknown weights and features scenario.}
+    \label{fig:res_sim2}
+  \end{subfigure} 
+    \caption{Learning time vs.\ cost difference on the holonomic robot for MMP (green), RLT$^*$-NC (blue), and RLT (red) at different planning fidelities. On both axes \emph{lower is better}.}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:results_sim}
+  \end{figure}
+
+ RLT$^*$ (red) comprises a large majority of the Pareto front, demonstrating good performance and generalisation in reasonable time.  However, the performance of RLT$^*$ and RLT$^*$-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient.
+ 
+ Note that caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm.  As mentioned in Section \ref{subsec:cached}, we hypothesise that the caching scheme improves learning by making the gradients smoother and more consistent, as with momentum. To confirm this, we plot the inner product between successive gradients during learning in Figure \ref{fig:in_prod_grad}. The plot confirms that subsequent gradients in RLT$^*$ are more similar.
+ 
+ Finally, note that MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states.  RLT$^*$ is less susceptible to such problems.
+
+ 	\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+    \includegraphics[scale=0.21]{figures/momentum.png}
+    \caption{Inner product of succcessive gradients during learning. The smoother curve for RLT$^*$ suggests that fixing the sampled points during learning makes the gradients more consistent. }
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:in_prod_grad}
+  \end{figure}
+
+
+  \subsubsection{Non-Holonomic Robot Results}
+  As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the presence of motion constraints. In this section, we consider a robot planning in a three-dimensional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following motion constraints:
+%
+  \begin{align}
+  	&\dot{x} = v\times\cos(\theta),\\
+  	&\dot{y} = v\times\sin(\theta),\\
+  	&\dot{\theta} = \omega,
+  \end{align}
+  where $v,\omega$ are the linear and angular velocities respectively.
+  To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion than an open loop trajectory. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in the same way as in the previous section, except that we compare RLT$^*$ only to RLT$^*$-NC and not MMP, as the latter cannot handle motion constraints.
+RLT$^*$-NC was given 100 seconds to plan, in which case about 3000 configurations were sampled, and RLT$^*$'s cache was set to this size. 
+
+Figure \ref{fig:results_kino} shows that RLT$^*$ is an order of magnitude faster than RLT$^*$-NC, while achieving a lower cost difference. The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. As in the holonomic case, RLT$^*$ resulted in smoother learning, confirming the results of Figure \ref{fig:in_prod_grad}. 
+
+  	\begin{figure}[tbh]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\hspace{-1cm}
+      % \begin{subfigure}[b]{0.42\columnwidth}
+    \includegraphics[scale=0.2]{figures/pareto_front_kino.png}
+    % \caption{Learning time vs.\ cost difference.}
+    % \label{fig:res_kino1}
+  % \end{subfigure}
+     	% \hspace{10mm}
+  % \begin{subfigure}[b]{0.42\columnwidth}
+
+  %   \includegraphics[scale=0.25]{images/cost_diff_val_kino.png}
+  %   \caption{Learning curve}
+  %   \label{fig:res_kino2}
+  % \end{subfigure} 
+    \caption{Non-holonomic robot results.}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:results_kino}
+  \end{figure}
+
+Figure \ref{fig:results_qual} shows an instance of the types of paths generated by our method when compared to ground truth. This specific example was drawn from the validation set and is thus not a case of overfitting.
+
+
+	\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+    \includegraphics[scale=0.12]{figures/kino_paths.png}
+    \caption{Qualitative evaluation of simulated results. The colour map denotes the learned cost function. Red denotes \emph(low) cost and green \emph{high} cost. The learned path (red) is quite similar to the demonstrated path (black) with a clear improvement over the path before learning (purple).}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:results_qual}
+  \end{figure}
+
+	\subsubsection{Real Robot Experiments}
+	In this section, we apply RLT$^*$ to real, human demonstrations using a telepresence robot, shown in Figure \ref{fig:robot}, in a social navigation scenario. Furthermore, we deploy the learned cost function on the actual robot.
+
+  	\begin{figure}[tbh]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\hspace{-1cm}
+      % \begin{subfigure}[b]{0.42\columnwidth}
+    \includegraphics[scale=0.13]{figures/robot.jpg}
+    % \caption{Learning time vs.\ cost difference.}
+    % \label{fig:res_kino1}
+  % \end{subfigure}
+     	% \hspace{10mm}
+  % \begin{subfigure}[b]{0.42\columnwidth}
+
+  %   \includegraphics[scale=0.25]{figures/cost_diff_val_kino.png}
+  %   \caption{Learning curve}
+  %   \label{fig:res_kino2}
+  % \end{subfigure} 
+    \caption{The telepresence robot used in our experiments.}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:robot}
+  \end{figure}
+
+	The experiments take place in a simplified version of the social scenarios we have seen in the previous section. There are two people in the scene at different positions and orientations. A human demonstrator is asked to execute paths for different initial and final conditions across the room. The task is similar to the one used in \cite{okallearning} and the purpose is to find cost functions that account for potential relationships between people depending on their orientation with respect to each other. For example, if people are facing each other, they are  likely engaged in conversation or a similar activity (e.g., taking a photograph) that should not be interrupted. By contrast, if they are looking away from each other and there is enough distance between them then, it might be better to pass between them if doing so yields a shorter path.
+
+	To collect data for learning and validation, we use an off-the-shelf telepresence system augmented with several sensors that allow localisation and perception \cite{shiarlis2015teresa}. We use an Optitrack motion capture system to accurately collect ground truth data of both people and robot positions. RLT$^*$ learns a cost function from this data using the social feature set S1 and the rest of the features described earlier.
+
+Since quantitative evaluation is difficult using real data, as no ground truth is available, we perform a qualitative evaluation instead. Figure \ref{fig:results_real} shows some representative cases that arose during learning. Figure \ref{fig:res_real1} shows a case where RLT$^*$ produced paths (red) that are quite similar to the demonstrated ones (black). Figure \ref{fig:res_real4} shows an instance instances where  the learned paths are reasonable even though they are not similar to the demonstrated paths.
+
+			\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+      \begin{subfigure}[b]{0.42\columnwidth}
+    \includegraphics[scale=0.12]{figures/real_good_new.png}
+    \caption{}
+    \label{fig:res_real1}
+  \end{subfigure}
+  \hspace{10mm}
+  \begin{subfigure}[b]{0.42\columnwidth}
+  \hspace{4mm}
+    \includegraphics[scale=0.12]{figures/real_reasonable_new.png}
+    \caption{}
+    \label{fig:res_real4}
+  \end{subfigure} 
+    \caption{Real demonstrated paths (black), learned paths (red), and shortest paths (purple). In (a), the learned path is similar to the demonstrated path; in (b) it is different but reasonable. The paths are laid over the learned cost function.}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:results_real}
+  \end{figure}
+
+
+	Finally, we successfully deployed the learned cost function, also shown in Figure \ref{fig:results_real}, on a real telepresence robot. A video demonstrating this deployment can be found in the supplementary material. Even though our planner outputs a full policy in terms of angular and linear velocities, to follow the prescribed path we used an elastic bands local planner in order to deal with dynamic changes in the environment.%\ks{should I say this?} \jm{I think it's ok} 
+
+
+
+\vspace{-1mm}
+\subsection{Conclusion \& Future Work}
+In this paper, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, it uses a caching scheme that greatly reduces the computational cost and improves performance. Our results in simulated social navigation scenarios show that RLT$^*$ achieves better performance at lower computational cost, even when there is a discrepancy between the features used for demonstration and learning. Furthermore, our results show that RLT$^*$ can handle more complex configuration spaces with motion constraints. Finally, we used RLT$^*$ to learn a cost function using data from real demonstrations on a telepresence robot and successfully deployed that cost function back on the robot.
+
+In future work, we hope to extend RLT$^*$ to model how features evolve over time, in order to, e.g., consider people's movement during planning.  For complex social path planning applications, periodic replanning has been shown to help \cite{henry2010learning,vasquez2014inverse}. Replanning in RRT$^*$ is also possible \cite{otte2015rrtx} and could potentially be incorporated into RLT$*$.
+>>>>>>> 3419034cfd28857d99443b62721f4c03cc22e56e
 
 
 \clearpage
@@ -614,11 +1130,19 @@ A naive approach to the problem would attempt to learn a direct mapping from obs
 
 Another problem with our input data is that the number of tracked persons at each time step varies. This variability in the input data makes processing using conventional Machine Learning methods difficult. One way to combat this problem is to set a max number of tracked people at each timestep, $N_{max}$. We would then make sure to include the closest $N_{max}$ tracked persons at each time. If $N_t$ would be less than $N_{max}$ then we could pad that vector with zeros. While this would be a viable option it could pose several difficulties for learning in practice. As an example picture two successive frames with different number of people. Were we to ensure that past frames are constant we would have to make sure that if a person is the same in the two time slots they should be put into the same person slot in order to facilitate learning, this could make data hard to preprocess and still lead to mistakes. For this reason we take a slightly different approach. For each input vector at time t we create an image such as the one shown in Figure \ref{fig:state}. Each person is drawn onto the image as a circle with intensity 1 while the interaction target is drawn as a circle with intensity 2. The position of this circles is determined by the person positions with respect to the robots frame. The created image has a fixed size and resolution which means that it can only represent persons that are present at a maximum distance of $d$ from the robot. In our $d$ was set to 2.5m. 
 
+<<<<<<< HEAD
   	\begin{figure}[tbh]
 	\centering
     \includegraphics[scale=0.50]{figures/state.png}
     \caption[Image representation of the robot's state]{The Image representation of the robot's state. The bright circle is the interaction target, the grey is another detected person. The robot is facing towards the positive x-axis of the image. Hence in this case the two people are just in front of the robot. }
   \label{fig:state}
+=======
+  	\begin{figure}[tbh]
+	\centering
+    \includegraphics[scale=0.50]{figures/state.png}
+    \caption{The Image representation of the robot's state. The bright circle is the interaction target, the grey is another detected person. The robot is facing towards the positive x-axis of the image. Hence in this case the two people are just in front of the robot. }
+  \label{fig:state}
+>>>>>>> 3419034cfd28857d99443b62721f4c03cc22e56e
   \end{figure}
 
 Another advantage of the image representation is that it allows us to use state of the art machine learning methods that exploit spacial structure in images such as convolutional neural networks which have proved to be very effective in image processing tasks \cite{krizhevsky2012imagenet}. This is explored in the next section.
@@ -1037,8 +1561,9 @@ After using RL on the three policies we can go back and see how they perform on 
 \section{Integrating different cost functions using a multi-objective approach}
 For the TERESA project, we have different sources of reward/cost (Section \ref{sec:integratecost}). When there are multiple sources of possibly conflicting feedback with respect to the socially optimal behaviour of the telepresence robot, e.g.,  corresponding to the user experience of the pilot (i.e., the person who steers the robot from a distance) and to the user experience of the target(s) (the person(s) with whom the robot is collocated and interacts directly), it is unclear what the best way is to integrate these. In the previous section, we have integrated different sources of cost manually, a priori. However, a theoretically more grounded way would be to see the different sources of cost as different objectives, and compute a set of policies for the robot that make different trade-offs between these objectives. This leads to so-called multi-objective decision making. 
 
-We explored the possibilities for using multi-objective decision making for social robotics,  where different sources of feedback correspond to multiple objectives that we would like to optimise simultaneously. However, because these objective may be conflicting, there is typically no single policy that attains the optimal value for each objective. Therefore, we must compute a so-called coverage set (CS), that contains at least one optimal policy for each possible utility function (i.e., preference) that a user might have with respect to the objectives. Because different users might have different interests while interacting with the robot, we take the utility function of the robot designer as the ultimate goal. We assume that this utility function is unobservable at the time when we need to plan different policies, and can only be partially observed after different policies have been computed, as a result of expressed preferences between different alternative policies.
-In order to model different sources of feedback, we make use of an extension to the partially observable Markov decision process (POMDP) model that we have used in this and earlier work packages. Specifically, in a multi-objective partially observable Markov decision process (MOPOMDP) the states, actions, transition function, observations and observation function are the same as in a POMDP, but the reward function is vector-valued, i.e., each element of the reward vector corresponding to a transition, corresponds to a different objective. 
+We explored the possibilities for using multi-objective decision making \cite{roijers13survey, roijersPhD} for social robotics,  where different sources of feedback correspond to multiple objectives that we would like to optimise simultaneously. However, because these objectives may be conflicting, there is typically no single policy that attains the optimal value for each objective. Therefore, we must compute a so-called coverage set (CS) \cite{roijers13survey}, that contains at least one optimal policy for each possible utility function (i.e., preference) that a user might have with respect to the objectives. Because different users might have different interests while interacting with the robot, we take the utility function of the robot designer as the ultimate goal. We assume that this utility function is unobservable at the time when we need to plan different policies, and can only be partially observed after different policies have been computed, as a result of expressed preferences between different alternative policies.
+
+In order to model different sources of feedback, we make use of an extension to the partially observable Markov decision process (POMDP) model \cite{Kaelbling98} that we have used in this and earlier work packages. Specifically, in a multi-objective partially observable Markov decision process (MOPOMDP) \cite{soh2011,roijers2015point,wray2015} the states, actions, transition function, observations and observation function are the same as in a POMDP, but the reward function is vector-valued, i.e., each element of the reward vector corresponding to a transition, corresponds to a different objective. 
 
 In the following subsections we investigate the following questions: 1) which different sources of feedback can be obtain reliable data for, and how can we translate these different sources of feedback into a MOPOMDP; 2) what is an appropriate coverage set for this MOPOMDP and how can we compute it; and 3) how can we perform user selection in an effective way such that the robot designer can make an informed decision about which policy to select and ultimately implement in the robot. Finally, we discuss why this approach did not work well in this setting (yet), and promising alleys for further investigation for multiple objectives for robotics, such as deep multi-objective reinforcement learning (which would mitigate the need for using an explicit MOPOMDP model). 
 
@@ -1090,9 +1615,9 @@ As in previous sections, we learn the transition, reward and observation functio
 We assume that the utility function of the user can be seen as a linear combination of the value of a policy in each objective. However, we must take into account that this assumption might be an oversimplification. 
 
 In the planning phase, we can thus assume that the value of a policy can be linearly scalarised, but we do not know the correct weights. Therefore, in the planning phase we must aim to compute a convex coverage set, i.e., the a set of policies that contains at least one optimal policy for each (linear) weighting of the objectives.  When all weight is given to the social feedback objective, the robot will just aim to minimise this feedback signal. When some weight is given to the second objective, the agent will be more likely to perform actions that provide correct detections to the pilot of the system.  
-We can compute a convex coverage set for an MOPOMDP, using the state-of-the-art optimistic linear support with alpha reuse (OLSAR) planning algorithm (out of the box).  
+We can compute a convex coverage set for an MOPOMDP, using the state-of-the-art optimistic linear support with alpha reuse (OLSAR) planning algorithm \cite{roijers2015point} (out of the box).  
 
-\subsection{Evaluation}
+\subsection{Evaluation}\label{sec:evalMO}
 After computing the convex coverage set, we show different policies to the users of the system. However, we cannot simply show the policy values with respect to social feedback and detection errors, and expect the user to be able to interpret these values. Instead, we ran the policies in a simulator, and plotted: a) the trajectory of the robot, and b) the detections it made. Such a plot took about 30 minutes to plot, using the Gazeebo simulator on ROS. In this way, we hoped that the policies would be able to be comparable in a meaningful way to the user. 
 
 However, we ran into several problems that we could not overcome: 
@@ -1110,8 +1635,18 @@ detection distance (the red circle) and the optimal social distance (the green c
 \label{fig:motraj}
 \end{figure}
 \end{itemize}
-\subsection{Lessons learnt and future research directions}
 
+\subsection{Lessons learnt and future research directions}
+While trying to model a social robotics problem as a multi-objective decision problem we ran into a several problems (see Section \ref{sec:evalMO}). From these, we draw the following conclusion: when the objectives are highly correlated, a lot of data is needed in order to create a MOPOMDP model that can lead to policies that make distinguishably different trade-offs between the objectives. Hence, when little data is available, multi-objective approaches with highly conflicting objectives could be promising for modelling as a MOPOMDP.  Having set this, we believe that multi-objective methods can be vital for solving decision problems in social robotics. Particularly, we think the following cases should be investigated taking a multi-objective approach: 
+\begin{itemize}
+\item Extending existing robotics tasks that have a clearly described reward such as cleaning or path planning, to a setting in which it social costs resulting from the presence of humans. In such cases, minimising the social costs will typically be conflicting with maximising the efficiency with which the task is performed, e.g., robotics may have to take a longer route to not disturb the humans. However, in some cases it may be acceptable to cause some hindrance to humans by taking a shorter path that avoids humans to some extent. In fact, that is what humans do themselves as well. 
+\item Social robotics tasks in which the social costs for different (groups of) users are clearly conflicting. For example, consider a group of people walking together with a telepresence robot, and a different group of people crossing the first group's path. If the robot would be overly considerate of the latter group, this may hinder the conversation in the former group. 
+\end{itemize}
+
+\subsubsection{Multi-objective deep reinforcement learning}
+Furthermore, we also believe that it would be highly promising to use techniques that do not require modelling an entire MOPOMDP. For single-objective settings, we have already mentioned LSTMs and RNNs. The power of these models is that they can generalise over states automatically, without designer intervention. However, in order to train these neural networks from interaction data, multi-objective deep reinforcement learning methods needed to be developed. 
+
+We developed the to our knowledge first deep multi-objective reinforcement learning algorithm, called Deep Optimistic Linear Support Learning (DOL) \cite{hossam2016}. DOL is built on Deep Q-Learning with standard (non-recurrent) deep Q-networks, and has so far been shown to work on problems that do not have the additional challenges of a) having to be learnt from physical interactions with a robot, and b) are not partially observable. In future work, we aim to create methods for deep multi-objective reinforcement learning, that can handle partially observable states (as is typically the case in social robotics settings) by incorporating memory (via LSTMs or RNNs), and apply these to our telepresence robot. In order to make such methods work for our telepresence robot, special attention must be paid to sample efficiency, as the sessions for gathering data with the telepresence robot are a scarce resource. 
 
 \section{Conclusions and Future Work in Tasks 5.1 and 5.2}
 \label{sec:conclusions}
