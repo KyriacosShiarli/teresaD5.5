@@ -51,12 +51,12 @@
 
 %% Adapt the version and code to your deliverable.
 %% Those values will appear in the header
-\delivcode{D5.3}
-\title{Feedback Part 2\\ Integrated Feedback System}
+\delivcode{D5.5}
+\title{Feedback Part 3\\ Integrated Feedback System}
 %% Running title
-\titlefoot{Feedback Part 2 -- Integrated Feedback System}
+\titlefoot{Feedback Part 3 -- Integrated Feedback System}
 
-\duedate{M30 -  May  31, 2016}
+\duedate{M36 -  November  30, 2016}
 \wpleader{UvA}
 \security{Public} %Public or private
 \status{Submitted} %Submitted
@@ -77,7 +77,7 @@
         \hline
         \rowcolor{gray!50}
         Date and Version Number & Author & Comments\\ \hline
-        31.05.2016 v1.0 & Jo\~ao Messias \&\hfill Kyriacos Shiarlis & Initial Verson.\\ \hline
+        30.11.2016 v1.0 & Jo\~ao Messias \&\hfill Kyriacos Shiarlis & Initial Verson.\\ \hline
 \end{tabular}
 
 \end{documentinfo}
@@ -139,191 +139,24 @@ Firstly in Section \ref{sec:rrt-iros} we present our latest work on Inverse Rein
 
 Section \ref{sec:sl_policy} outlines a method that uses data of human demonstrations coupled with Deep Neural Networks, that allows the robot to learn body pose policies. Such policies determine for example how the robot should possition itself in the presence of an interaction target and an interaction group as well as how it should react to their movement.
 
-Next in Section \ref{sec:sl+rl} we demonstrate how the cost functions learned using human feedback in Deliverable 5.3, can be integrated with the system detailed in Section ??. This is done using a novel hierarchical Neural Network architectures that Reinforcement Learning and Supervised Learning simultaneously. We further present an evaluation that shows that the robot can learn to replicate the demonstrated behaviour while at the same time perform well with respect to the given cost function.  
+Next in Section \ref{sec:sl+rl} we demonstrate how the cost functions learned using human feedback in Deliverable 5.3, can be integrated with the system detailed in Section \ref{sec:sl_policy}. This is done using  Neural Network architectures that use Reinforcement Learning and Supervised Learning simultaneously. We further present an evaluation that shows that the robot can learn to replicate the demonstrated behaviour while at the same time perform well with respect to the given cost function.  
 
 Finally in Section \ref{sec:mopomdp}, we describe a more theoretical approach to cost function integration, based on multi objective partially observable markov decision processes.
 
 \pagebreak
 
 
-\section{Learning navigation cost functions from demosntration}
+\section{Learning navigation cost functions from demonstration}
 \label{sec:rrt-iros}
 
-In the previous deliverable D5.3, we proposed a new Inverse Reinforcement Learning method that allowed us to learn RRT* cost function from demonstrations. We named this method Rapidly Exploring Random Trees and we showed its effectiveness in navigation settings. In this section we report our progress in that direction. Firstly we review our background and method sections from the previous deliverable. We then go on to perform more thorough experiments in order to compare $RLT^*$ with the baseline method of maximum margin planning (MMP). Furthermore we show that our method can be effectively used to deal with kinodynamic constraints that a robot might have and we demonstrate that our method is much faster than simply using a naive implementation. Finally we apply the method to real data collected during the TERESA project in order to derive a cost function for navigation.
+In the previous deliverable D5.3, we proposed a new Inverse Reinforcement Learning method that allowed us to learn RRT* cost function from demonstrations. We named this method Rapidly Exploring Random Trees and we showed its effectiveness in navigation settings. In this section we report our progress in that direction. First we perform more thorough experiments in order to compare $RLT^*$ with the baseline method of maximum margin planning (MMP). Furthermore we show that our method can be effectively used to deal with kinodynamic constraints that a robot might have and we demonstrate that especially in this case our method is much faster than simply using a naive implementation. Finally we apply the method to real data collected during the TERESA project in order to derive a cost function for navigation.
 
-
-
-\subsection{Approximate Maximum Margin Planning \label{subsec:ammp}}
-
-Section \ref{subsec:inverse_problem} shows how the multiple constraints of \eqref{eq:const1} can be reduced to the single constraint of \eqref{eq:const} for each demonstration. However, this reduction requires an optimal planner to perform the minimisation in \eqref{eq:const1}, which is impractical in many robot applications. Suppose instead that, as in RRT$^*$, we have a mechanism for sampling different paths from $Z_{o,g}$ along with their respective costs and that, for a given finite time budget $T$, this path sampler samples a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$,  Then, we can modify \eqref{eq:const} to demand that our cost function satisfies,
-\begin{equation}
-	C(\zeta^i_{o_i,g_i}) \leq \min_{\zeta_{o_i,g_i} \in \tilde{Z}_{o_i,g_i}} C(\zeta) \quad \forall i. \label{eq:const_rrt}
-\end{equation}
-	As $T$ increases, lower cost paths are sampled, making this inequality harder to satisfy. Assuming $\tilde{Z}_{o_i,g_i}$ is constant, we can rewrite \eqref{eq:unconstrained} as:
-
-	\begin{equation} \frac{1}{2}||\mathbf{w}||^2 + \frac{\lambda}{D} \sum_i \big( C(\zeta^i_{o_i,g_i}) - \min_{\zeta \in \tilde{Z}_{o_i,g_i}}\big(C(\zeta) + L_i(\zeta)\big) \big). \label{eq:unconstrained_rrt}
-	\end{equation}
-This gives rise to an approach we call Approximate Maximum Margin Planning (AMMP). It is similar  to MMP with the crucial difference that the planning step is executed by a sample-based planner and not a deterministic one, like A$^*$. An important consequence is that $\tilde{Z}_{o_i,g_i}$ changes every time we invoke the sample-based planner. Thus, AMMP can be thought of as sampling the \emph{constraints} that we want our cost function to satisfy. The main advantage of AMMP is that it is not bound by the restrictive assumptions of  A$^*$, such as a discrete state-action space and no motion constraints. 
-
-However, an ineffective sampler could yield poor gradient estimates and thus poor solutions. In fact, Ratliff et al.\ \cite{ratliff2009chomp} argue that, for this reason, sample-based planners like RRT are not suited to learning cost functions from demonstration, as the paths sampled by RRT are heavily biased during the sampling process and thus highly suboptimal. However, asymptotically optimal sample-based planners like RRT$^*$ are better able to plan low-cost paths \cite{karaman2011sampling} and thus well suited for use within AMMP.
-
-\subsubsection{Rapidly Exploring Learning Trees \label{subsec:cached}}
-
-As suggested above, a simple way implement AMMP is to use RRT$^*$ as the sample-based planner.  RRT$^*$ can sample low-cost paths, allowing AMMP to learn a good cost function. Furthermore, RRT$^*$ can cope with large and continuous state-action spaces with motion constraints. However, the result is a computationally expensive algorithm that calls the planner $I\times|D|$ times over $I$ iterations, given a dataset of size $|D|$. Furthermore, sampling a separate set of points at every iteration could produce noisy gradients that negatively affect convergence. In this section, we propose Rapidly Exploring Learning Trees (RLT$^*$), which implements AMMP with an RRT$^*$ planner using a novel caching scheme to ensure both computational efficiency and more consistent gradients.
-
-A key observation is that, in RRT$^*$, only the rewiring step depends on the cost function.  The sampling step is independent of it and, especially when motion constraints are present, contains the most computationally expensive operations. These are: 1) fitting and querying a data structure to find the nearest neighbour and the radius neighbours to a newly sampled point, 2) applying the steer function to all neighbours to and from the newly sampled point, and 3) checking for obstacles in these paths. By contrast,  the only potentially expensive operation in the rewiring step is querying the cost of an edge. 
-
-Therefore, a key idea behind RLT$^*$ is to perform the sampling step just once for each data point and cache it for reuse throughout learning. Then, at each iteration, only the rewiring step needs to be repeated as the cost function changes.
-
-Algorithm \ref{alg:rrt_cache} describes the caching step, which takes as input $p$, the number of points to randomly sample from free space; $s_{init}$, the initial point; and $\eta$, the steer step size. For each randomly sampled point $s_{rand}$, we find the nearest neighbour, $s_{nearest}$, from the set of points in the vertex set $V$. We then create a new configuration point $s_{new}$ by steering from $s_{nearest}$ to $s_{rand}$. Next, we query the radius neighbours, $S_{near}$, of $s_{new}$ at a radius determined by  $\min\{\gamma_{RRT^*}(\frac{\log(|V|)}{|V|})^{\frac{1}{d}},\eta\}$. Here, $d$ is the dimensionality of $S$, and $\gamma_{RRT^*}$ is a constant based on the volume of free space (see \cite{karaman2011sampling}).  Next, we determine which points in $S_{near}$ can safely reach $s_{new}$ through the chosen \texttt{Steer} function (lines 13-17). These forward paths are stored in $Paths_{fwd}$. We then perform the same procedure but this time checking the paths from $s_{new}$ to $S_{near}$ and store them in the set $Paths_{bwd}$ (lines 18-22). This algorithm turns the sampling process of RRT$^*$  into a preprocessing step. Consequently, the expensive \texttt{Nearest}, \texttt{Near}, \texttt{Steer} and \texttt{Safe} procedures only need to be repeated $|D|$ times instead of $I\times|D|$ times.
-
-
-	\begin{algorithm}
-	 \algsetup{linenosize=\tiny}
- 	\scriptsize
-	\caption{\small \texttt{cacheRRT}($n$,$s_{init}$,$\eta$)}
-	\label{alg:rrt_cache}
-	\begin{algorithmic}[1]
-	\STATE $P \gets \emptyset$ \hfill \COMMENT{Initialise the point cache}
-	\STATE $V \gets {s_{init}}$
-	\FOR{$i=0 \dots n $}
-	\STATE $s_{rand} \gets SampleFree_i$
-	\STATE $s_{nearest} \gets \texttt{Nearest}(V,s_{rand})$
-	\STATE $s_{new} \gets \texttt{Get}(s_{nearest},s_{rand})$
-	\STATE $S_{near} \gets \texttt{Near}(V,{s_{new}},\min\{\gamma_{RRT^*}(\frac{\log(|V|)}{|V|})^{\frac{1}{d}},\eta\})$
-	\STATE $Paths_{fwd} \gets \emptyset$
-	\STATE $Paths_{bwd} \gets \emptyset$
-	\STATE $S_{fwd} \gets \emptyset$
-	\STATE $S_{bwd} \gets \emptyset$
-	\FOR{$s_{near} \dots S_{near}$}
-	\STATE $path_{fwd} = \texttt{Steer}(s_{near},s_{new})$
-	\IF{$\texttt{Safe}(path_{fwd})$}
-	\STATE $Paths_{fwd} \gets Paths_{fwd} \cup path_{fwd}$
-	\STATE $S_{fwd} \gets S_{fwd} \cup s_{near}$
-	\ENDIF
-	\STATE $path_{bwd} = \texttt{Steer}(s_{new},s_{near})$
-	\IF{$\texttt{Safe}(path_{bwd})$}
-	\STATE $Paths_{bwd} \gets Paths_{bwd} \cup path_{bwd}$
-	\STATE $S_{bwd} \gets S_{bwd} \cup s_{near}$
-	\ENDIF
-	\ENDFOR
-	\STATE $V\gets V \cup s_{new}$
-	\STATE $P \gets P \cup \{s_{nearest},s_{new},S_{fwd},S_{bwd},Paths_{fwd},Paths_{bwd}\}$
-	\ENDFOR
-	\RETURN $P$
-	\end{algorithmic}
-
-	\end{algorithm}
-
-
-The output of Algorithm \ref{alg:rrt_cache} is input to Algorithm \ref{alg:plan_cached}, which resembles the rewiring procedure in RRT$^*$ \cite{karaman2011sampling} and returns a low-cost path to the goal. However, unlike RRT$^*$ rewiring, the vertices of the tree and their neighbours at each iteration are already known and contained within the point cache. This speeds computation while keeping consistency between the planners used during learning and final execution. As learning proceeds and the cost function changes, so does the wiring of this tree; however, the points involved do not change. %Note that, despite caching, Algorithms \ref{alg:rrt_cache} and \ref{alg:plan_cached} are consistent with the planning procedure of the RRT$^*$. Consequently, there is no discrepancy between the planner used during learning and execution.
-
-Algorithm \ref{alg:ammp} describes Rapidly Exploring Learning Trees (RLT$^*$), which uses Algorithms \ref{alg:rrt_cache} and \ref{alg:plan_cached}. First, we initialise the weights, either randomly or using a cost function that simply favours shortest paths. Then, for each datapoint $\zeta_i$, we calculate feature sums and run \texttt{cacheRRT}. The main learning loop involves cycling through all data points and finding the best path under a loss-augmented cost function. The feature sums of this path are calculated and subsequently the difference with the demonstrated feature sums is computed. At the end of each iteration, an average gradient is calculated and the cost function is updated. At convergence, the learned weights are returned.
-
-In addition to saving computation time, the use of caching encourages consistency between the gradients computed in each iteration, as they are estimated from the same sampled points.  The effect on the gradients, which resembles that of momentum \cite{polyak1964some}, can improve performance, as our results in the next section show.
-
-	\begin{algorithm}
-	\algsetup{linenosize=\tiny}
- 	\scriptsize
-	\caption{\texttt{planCachedRRT$^*$}($P$,$s_{init}$,$c()$)}
-	 \label{alg:plan_cached}
-	\begin{algorithmic}[1]
-	\STATE $E \gets \emptyset$
-	\STATE $V \gets {s_{init}}$
-	\FOR{$i=0 \dots |P| $}
-	\STATE $(s_{nearest},s_{new}) \gets P_i$
-	\STATE $(S_{fwd},S_{bwd}) \gets P_i$
-	\STATE $(Paths_{bwd},Paths_{fwd}) \gets P_i$
-	\STATE $V\gets V \cup s_{new}$
-	\STATE $s_{min}\gets s_{nearest}$
-	\STATE $c_{min}\gets \texttt{Cost}(s_{nearest}) + c(path_{s_{nearest},s_{new}})$
-	%\FOR{$s_{fwd} \in S_{fwd} $}
-	\FOR{$j=0 \dots |S_{fwd}| $}
-	\STATE $s_{fwd} = S^j_{fwd}$
-	\STATE $path_{fwd} = Paths^j_{fwd}$  
-	\STATE $C_{near} \gets \texttt{Cost}(s_{fwd}) + c(path_{fwd})$
-	\IF { $C_{near}<c_{new}$}
-	\STATE $s_{min} \gets s_{fwd}; c_{min}\gets c_{near}$
-	\ENDIF
-	\ENDFOR
-	\STATE $E \gets E \cup \{(s_{min},s_{new})\} $
-	%\FOR{$s_{bwd} \in S_{bwd} $}
-	\FOR{$j=0 \dots |S_{bwd}| $}
-	\STATE $s_{bwd} = S^j_{bwd}$
-	\STATE $path_{bwd} = Paths^j_{bwd}$
-	\STATE $C_{new} \gets \texttt{Cost}(s_{new}) + c(path_{bwd})$
-	\IF {$C_{new}<\texttt{Cost}(s_{near})$}
-	\STATE $s_{parent} \gets \texttt{Parent}(s_{bwd})$
-	\STATE $E \gets E  \smallsetminus {(s_{parent},s_{bwd})} \cup {(s_{new},s_{bwd})} $
-	\ENDIF
-	\ENDFOR
-	\ENDFOR
-	\STATE $\zeta_{min} \gets \texttt{minCostPath}(V,E,c())$
-	\RETURN $\zeta_{min}$
-	\end{algorithmic}
-	\end{algorithm}
-
-
-
-	\begin{algorithm}
-	 \algsetup{linenosize=\tiny}
-  	\scriptsize
-	\caption{\texttt{RLT$^*$}($D,p,\eta,\lambda,\delta$)\label{alg:ammp}}
-	\begin{algorithmic}[1]
-	\STATE $\mathbf{w} \gets \texttt{initialiseWeights}$
-	\STATE $\mathbf{\tilde{F}} \gets \emptyset$
-	\STATE $R \gets \emptyset$
-	\FOR{$\zeta^i \text{ in } D$}
-	\STATE $\tilde{F}_{\zeta^i} \gets \texttt{FeatureSums}(\zeta^i)$
-	\STATE $\mathbf{\tilde{F}} \gets \mathbf{\tilde{F}} \cup \tilde{F}_{\zeta^i}$
-	\STATE $r_i \gets \texttt{cacheRRT}(p,s_{init}^{\zeta^i},\eta)$
-	\STATE $R \gets R \cup r_i $
-	\ENDFOR
-	\REPEAT
-	\STATE $\nabla_{\mathbf{w}}\gets 0$
-	\FOR{$ \zeta^i \text{in } D $}
-	\STATE $c() \gets \texttt{getCostmap}(\mathbf{w}) + L(\zeta^i)$ 
-	\STATE $r_i \gets R\{i\}$ ;	$\tilde{F}_i \gets \mathbf{\tilde{F}}\{i\}$ 
-	\STATE $\zeta \gets \texttt{planCachedRRT}^*(r_i,x^i_{init},c())$
-	\STATE $F_i \gets \texttt{FeatureSums}(\zeta)$
-	\STATE $\nabla_{\mathbf{w}} \gets \nabla_{\mathbf{w}} + \tilde{F}_i - F_i $
-	\ENDFOR
-	\STATE $\nabla_{\mathbf{w}} \gets \mathbf{w} + \frac{\lambda}{|D|}\nabla_{\mathbf{w}} $
-	\STATE $\mathbf{w} \gets \mathbf{w} - \delta\nabla_{\mathbf{w}} $
-	\UNTIL{convergence}
-	\RETURN $\mathbf{w}$
-
-	\end{algorithmic}
-	\end{algorithm}
-
-	% \STATE $\widetilde{\mu}^{\mathcal{D}} \gets \mathtt{empiricalFE}(\mathcal{D})$\hfill \COMMENT{using \eqref{eqn:empirical_fe}}
-	% \STATE $\widetilde{\mu}^{\mathcal{F}} \gets \mathtt{empiricalFE}(\mathcal{F})$ 
-	% \STATE $P_{\mathcal{D}}^{s_1} \gets \mathtt{initialStateDistribution}(\mathcal{D})$
-	% \STATE $P_{\mathcal{F}}^{s_1} \gets \mathtt{initialStateDistribution}(\mathcal{F})$
-	% \STATE $w^{\mathcal{F}}_k\gets 0\quad\forall k\in\{1,\ldots,K\}$
-	% \REPEAT
-	% \STATE $R(s,a) \gets (w^{\mathcal{D}}+w^{\mathcal{F}})^T\phi(s,a)\quad\forall s\in\mathcal{S},a\in\mathcal{A}$
-	% \STATE $\pi \gets \mathtt{softPlan}(\mathcal{S},\mathcal{A},T,R)$\hfill\COMMENT{using \eqref{eq:soft_backup}}
-	% \STATE $\mu^\pi|_{\mathcal{D}} = \mathtt{calculateFE}(\pi,T,P_{\mathcal{D}}^{s_1})$
-	% \STATE $\mu^\pi|_{\mathcal{F}} = \mathtt{calculateFE}(\pi,T,P_{\mathcal{F}}^{s_1})$
-	% \STATE $w^{\mathcal{D}} \leftarrow w^{\mathcal{D}} - \alpha (\mu^\pi|_{\mathcal{D}} - \widetilde{\mu}^{\mathcal{D}})$
-	% \STATE $w^{\mathcal{F}} \leftarrow \frac{(\mu^\pi|_{\mathcal{F}} - \widetilde{\mu}^{\mathcal{F}})}{\lambda}$
-
-	% \IF {$\lambda > \lambda_{min}$}
-	% \STATE $\lambda \leftarrow \alpha_{\lambda}\lambda$
-	% \ENDIF
-	% \UNTIL{convergence}
-	% \RETURN $R,\pi$
-
-
-For RRT$^*$, the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is hard to quantify since it depends on the size and nature of $S$ as well as the cost function we are using, which also changes with every iteration. For this reason, we resort to an experimental assessment of the ability of RRT$^*$ to sample the right constraints at every iteration of RLT$^*$ and hence effectively learn a cost function from demonstration.
+Our experiments take place as always in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{henry2010learning,vasquez2014inverse,okallearning} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
 
 \subsection{Experiments}
 
 We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, and RLT$^*$-NC, an ablated version of RLT$^*$ that does not use caching.  We consider three experimental settings: 1) a simulated holonomic robot, 2) a simulated non-holonomic robot, and 3) a real telepresence robot.
-	
-	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{henry2010learning,vasquez2014inverse,okallearning} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
-	
+
 	\subsubsection{Simulated Experiments}
 	We first consider randomly generated social environments in simulation, such as the one shown in Figure \ref{fig:exp_setting}. Each arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task is to use $D$ to extract a cost function that enables socially intelligent behaviour.
 
@@ -434,7 +267,7 @@ We also document the total learning time for K iterations for the algorithms und
 
  RLT$^*$ (red) comprises a large majority of the Pareto front, demonstrating good performance and generalisation in reasonable time.  However, the performance of RLT$^*$ and RLT$^*$-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient.
  
- Note that caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm.  As mentioned in Section \ref{subsec:cached}, we hypothesise that the caching scheme improves learning by making the gradients smoother and more consistent, as with momentum. To confirm this, we plot the inner product between successive gradients during learning in Figure \ref{fig:in_prod_grad}. The plot confirms that subsequent gradients in RLT$^*$ are more similar.
+ Note that caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm.  We hypothesise that the caching scheme improves learning by making the gradients smoother and more consistent, as with momentum \cite{sutskever2013importance}. To confirm this, we plot the inner product between successive gradients during learning in Figure \ref{fig:in_prod_grad}. The plot confirms that subsequent gradients in RLT$^*$ are more similar.
  
  Finally, note that MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states.  RLT$^*$ is less susceptible to such problems.
 
@@ -450,7 +283,7 @@ We also document the total learning time for K iterations for the algorithms und
 
 
   \subsubsection{Non-Holonomic Robot Results}
-  As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the presence of motion constraints. In this section, we consider a robot planning in a three-dimensional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following motion constraints:
+  A potential advantage of RLT$^*$ is that it can efficiently handle learning in the presence of motion constraints. In this section, we consider a robot planning in a three-dimensional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following motion constraints:
 %
   \begin{align}
   	&\dot{x} = v\times\cos(\theta),\\
@@ -528,7 +361,7 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
 
 \vspace{-1mm}
 \subsection{Conclusion \& Future Work}
-In this paper, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, it uses a caching scheme that greatly reduces the computational cost and improves performance. Our results in simulated social navigation scenarios show that RLT$^*$ achieves better performance at lower computational cost, even when there is a discrepancy between the features used for demonstration and learning. Furthermore, our results show that RLT$^*$ can handle more complex configuration spaces with motion constraints. Finally, we used RLT$^*$ to learn a cost function using data from real demonstrations from the TERESA robot and successfully deployed that cost function.
+In this section we have presented our progress on the RLT* algorithm that was presented in the previous deliverable. We have implemented a fast kinodynamic version of RLT* and we have applied the algorithm to one of the datasets collected during local experiments.
 
 In future work, we hope to extend RLT$^*$ to model how features evolve over time, in order to, e.g., consider people's movement during planning.  For complex social path planning applications, periodic replanning has been shown to help \cite{henry2010learning,vasquez2014inverse}. Replanning in RRT$^*$ is also possible \cite{otte2015rrtx} and could potentially be incorporated into RLT$*$.
 
@@ -544,7 +377,7 @@ In future work, we hope to extend RLT$^*$ to model how features evolve over time
 Apart from being able to navigate socially, a key functionality for our semi-autonomous telepresence system, is to allow the pilot to engage in conversation 
 with the people around the robot, without any input from the pilot himself. While in some ideal conditions this would be a simple tracking problem, (the robot attempts to always face a person), it is no longer the case in real social environments. This is because firstly there could be significant sensor noise, not allowing the robot to track everyone in its surroundings. Secondly, in crowded environments social norms become harder to hard code. For example we might need to converse with various sizes of groups at different formations. The TERESA system attempts to deal with these problems by learning from human interaction.
 
-In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robot`s behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's prefferences with respect to the robot. In this deliverable we take a different approach. Instead of asking direct feedback from users we employ a human expert to demonstrate the correct behaviour to the robot. Using the collected demonstrations we learn a direct mapping from sensor readings to socially appropriate actions. The rest of the section is organised as follows. 
+In Deliverable 5.3 we described in detail, several experiments of people and groups interacting with the robot. During these interactions both the pilot and the interaction target(s) gave direct feedback on the robot`s behaviour. After processing the collected data, two cost functions were produced that allowed us to encode people's preferences with respect to the robot. In this deliverable we take a different approach. Instead of asking direct feedback from users we employ a human expert to demonstrate the correct behaviour to the robot. Using the collected demonstrations we learn a direct mapping from sensor readings to socially appropriate actions. The rest of the section is organised as follows. 
 
 \begin{itemize}
 	\item In Section \ref{sec:demonstration_experiment} we describe local experiments performed at the UvA. The aim of this experiments where to simulate different social situations and extract human demonstrations of control during robot conversation. We further describe how this data was filtered, processed. Finally we describe the input and output representations used in the learning.
@@ -554,7 +387,7 @@ In Deliverable 5.3 we described in detail, several experiments of people and gro
 
 \subsection{Local Experiments and demonstration collection}
 \label{sec:demonstration_experiment}
-The fist step to achieving the goals set out in this section was to perform experiments in order to collect appropriate demonstration data in various social interaction situations. These experiments took place at the University of Amsterdam in August 2016. These were focused on collecting control data from human demonstrations at different social situations as well as data from all of the robot's sensors. Using machine learning, the aim was to match sequences of input data to the appropriate controls allowing the robot to thus mimic the human demonstrations in new unseen situations. The main aims of the experimental setup and procedure were:
+The first step to achieving the goals set out in this section was to perform experiments in order to collect appropriate demonstration data in various social interaction situations. These experiments took place at the University of Amsterdam in August 2016. These were focused on collecting control data from human demonstrations at different social situations as well as data from all of the robot's sensors. Using machine learning, the aim was to match sequences of input data to the appropriate controls allowing the robot to thus mimic the human demonstrations in new unseen situations. The main aims of the experimental setup and procedure were:
 
 \begin{itemize}
 \item To collect data of the robot interacting with various groups sizes.
@@ -599,7 +432,7 @@ Before using a learning algorithm to learn a mapping from sensor observations to
 
 The first step in processing was removing parts where we would not expect the robot to learn a correct mapping for. This occured for example in cases where the participants would quickly move away from the robot, in cases where unusual circumstances took place, or times when the human expert would make an obvious mistake. This data filtering took place by playing back the data and annotating frames where innapropriate data was present, so that they could be ingored further down the pipeline. 
 
-Next using the ground truth data from the Optitrack system we labeled which person was considered to be the interaction target during the conversation. This step is essential because during normal use of the TERESA system an interaction target also needs to be defined by the pilot. The ground truth positions of the interaction targets was not used to correct the readings from the robots localisation system. This ensured that during learning we also learn a model of the localisation system`s noise. 
+Next using the ground truth data from the Optitrack system we labeled which person was considered to be the interaction target during the conversation. This step is essential because during normal use of the TERESA system an interaction target also needs to be defined by the pilot. The ground truth positions of the interaction targets was not used to correct the readings from the robot's people detection system. This ensured that during learning we also learn a model of the localisation system`s noise. 
 
 After filteting the next step was data synchronisation. During the experiments the data from the localisation system and control come at different rates and are thus asynchronous. We synchronised the data by first setting the desired control rate for the final system at 10Hz and then retrieving the latest data from the localisation system and the control outputs at that rate.   
 
@@ -626,7 +459,7 @@ Another advantage of the image representation is that it allows us to use state 
 \subsubsection{Outputs}
 The learning algorithm is expected to output a policy, i.e. a control output for a set of inputs. While our outputs are linear and angular velocities, it is not clear wether having continuous or discrete outputs is better in terms of learning and performance of the resulting policy. Having discrete outputs results in a classification problem which is typically easier to solve than a regression problem, which is the case with a continuous representation. Another drawback of continuous representations is that the output distribution could be mutimodal, which is something that continuous output networks do not typically account for. However a continuous representation is much more natural in this case and could result in a much more aggreable behaviour from the robot. For this reason we decided to try both representations and choose best one after deployment on the robot. 
 
-Another problem in terms of the outputs, for this specific application sourced from the fact that during the training data, the robot was stopped for far longer than it was actually moving. This posed problems in both the cases of a continuous and a discrete output. In the discrete case, far more datapoints where in the specific class of $(v,\omega) = (0,0)$ than any of the other individual classes, this can hurt the learning or even urge the network to simply output that class if sufficient measures are not taken. In the continuous case, it may cause the network to output smaller velocities than required. To combat this effect we took two measures. First we made sure that a similar portion of static and moving outputs where present in the data. Secondly we experimented with a hierarchical output architecture. In this case, the learning algorithm must first clasify wether or not the output should be (0,0) or something else. Then given that the output is not (0,0) it decides what the output should be. This feature made a big difference when deployed on the robot and it is hence present in all the models we consider.
+Another problem in terms of the outputs, for this specific application sourced from the fact that during the training data, the robot was stopped for far longer than it was actually moving. This posed problems in both the cases of a continuous and a discrete output. In the discrete case, far more datapoints where in the specific class of $(v,\omega) = (0,0)$ than any of the other individual classes, this can hurt the learning or even urge the network to simply output that class if sufficient measures are not taken. In the continuous case, it may cause the network to output smaller velocities than required. To combat this effect we took two measures. First we made sure that a similar portion of static and moving outputs where present in the data. Secondly we experimented with a hierarchical output architecture. In this case, the learning algorithm must first classify whether or not the output should be (0,0) or something else. Then given that the output is not (0,0) it decides what the output should be. This feature made a big difference when deployed on the robot and it is hence present in all the models we consider.
 
 
 \subsection{Learning} \label{sec:dnn_arch}
@@ -834,7 +667,7 @@ The overall architecture of the DNN we used is depicted in Figure \ref{fig:net_a
 	    \includegraphics[width=0.9\textwidth]{figures/net.pdf}
 	%\vspace{-4mm}
 	  \caption[DNN Architecture]{The DNN architecture used to learn body pose policies from demonstration.}
-	  \label{fig:pipeline}
+	  \label{fig:net_arch}
 	\end{figure}
 
 \subsubsection{Continuous Learning Pipeline}
@@ -889,7 +722,7 @@ Empirical results from the deployment of these policies can be found in Delivera
 \clearpage
 
 
-\section{Integrating cost functions and human demonstrations (WIP)} \label{sec:sl+rl}
+\section{Integrating cost functions and human demonstrations} \label{sec:sl+rl}
 \subsection{Introduction}
 In the previous section we employed a DNN architecture to learn a social body pose policy from demonstrations, which is this section we refer to as the SL policy. One might argue however, that this would require a lot of samples from human demonstrations in order to result in a satisfactory behaviour for the robot. In this case Reinforcement Learining (RL) could be a more viable option for learning policies. In RL, one only needs to encode the preferences of a user in a cost(or reward) function and using that the robot can learn continuously. Designing a social cost function for our purposes however can be very challenging. One way to combat this drawback would be to use Inverse Reinforcement Learning (IRL) along with the collected human demonstrations. IRL was discussed in this and previous deliverables and has played a key role in deriving our navigation cost functions. The problem in this case is that our domain is partially observable and high dimentional. This means that we would need to use model free IRL methods such as [CITE REIRL] which can be very time consuming and still unreliable. In this section we take a slightly different approach. We investigate the possibility of using the policy learned from human demonstrations in combination with a hand coded cost function with the aim of learning a policy that both mimics the demonstrations and minimises the required cost simultaneously and prefferebly without any tradeoff. By doing so we aim to:
 
@@ -898,7 +731,7 @@ In the previous section we employed a DNN architecture to learn a social body po
 	\item Using RL to improve the SL policy where we feel is not peforming adequetly.   
 \end{itemize}
 
-In this section we propose a method that can integrate SL policies with hand coded cost(reward) functions and we show that for reasonable cost functions the above requirements can be satisfied. We begin with an introduction to basic policy gradient mathods for reinforcement learning in Section \ref{sec:pg_background}. We proceed to propose a simple cost function that tests our requirements above as well as an exploration strategy for the RL algorithm, this is done in Section ??. Finally we present some results in Section ?? and discuss future work in Section ??.
+In this section we propose a method that can integrate SL policies with hand coded cost(reward) functions and we show that for reasonable cost functions the above requirements can be satisfied. We begin with an introduction to basic policy gradient mathods for reinforcement learning in Section \ref{sec:pg_background}. We proceed to propose a simple cost function that tests our requirements above as well as an exploration strategy for the RL algorithm, this is done in Section \ref{sec:pg_implement}. Finally we present some results in Section \ref{sec:pg_results} and discuss future work in Section \ref{sec:pg_future}.
 
 
 \subsection{Background}\label{sec:pg_background}
@@ -935,11 +768,11 @@ Policy gradient methods attempt to perform gradient descent on this objective. T
 
 \begin{align}
 	\nabla_{\theta}J(\pi_{\theta}) &= \int_{\mathcal{S}} \rho(s)^{\pi} \int_{\mathcal{A}}\nabla_{\theta}\pi_{\theta}(s,a)Q^{\pi}(s,a)dads\\
-	&= \mathbb{E}_{\rho^{\pi},\pi_{\theta}} [\nabla_{\theta}\log\pi_{\theta}(s,a)Q^{\pi}(s,a)]
+	&= \mathbb{E}_{\rho^{\pi},\pi_{\theta}} [\nabla_{\theta}\log\pi_{\theta}(s,a)Q^{\pi}(s,a)] \label{eq:pg}
 \end{align}
 
 The REINFORCE algrotithm calculates $Q^{\pi}(s,a)$ using discounted sample returns.
-In the case of our SL policy derived in the previous section, it could be the case that although the output is stochastic the network is too confident about a certain action. This would prevent any exploration from the agent which would make learning slow and possibly inneffective. In this case it is useful to act according to a different behaviour policy $\beta(s,a)$ while computing a gradient for our original policy $pi_{\theta}(s,a)$. The only modification to equation ?? would be weighing the gradient by an importance ratio, i.e.,  
+In the case of our SL policy derived in the previous section, it could be the case that although the output is stochastic the network is too confident about a certain action. This would prevent any exploration from the agent which would make learning slow and possibly inneffective. In this case it is useful to act according to a different behaviour policy $\beta(s,a)$ while computing a gradient for our original policy $pi_{\theta}(s,a)$. The only modification to equation \ref{eq:pg} would be weighing the gradient by an importance ratio, i.e.,  
 
 \begin{equation}
 \nabla_{\theta}J(\pi_{\theta}) = \mathbb{E}_{\rho^{\beta},\beta_{\theta}} [\frac{\pi_{\theta}(s,a)}{\beta_{\theta}(s,a)}\nabla_{\theta}\log\pi_{\theta}(s,a)Q^{\pi}(s,a)]
@@ -948,30 +781,35 @@ In the case of our SL policy derived in the previous section, it could be the ca
 
 
 
-\subsection{Implementation}
+\subsection{Implementation}\label{sec:pg_implement}
 In this section we describe the aspects of the algorithm specific to out implementation of REINFORCE. The state representation remains the one we have described in Section \ref{sec:demonstration_experiment}. As an action representation we use a non-hierachical discretised action representation.
 
 \subsubsection{Learning scenario and reward function}
 
-As a proof of concept we use a simulated static scenario where two persons are standing in the middle of a square room as shown in Figure ??. The robot is spawned at different orientations and positions around the persons every 40 seconds, which we consider the duration of one episode. Although there are two persons in the scene, only one of the two is considered the interaction target. Hence in our image input representation only one circle is given a value of 2 and the other a value of 1. The reward function in this scenario consists of two parts. The first which we name $r_i$ is a based on the orientation of the robot with respect to the interaction target. 
+As a proof of concept we use a simulated static scenario where two persons are standing in the middle of a square room as shown in Figure \ref{fig:pg_setting}. The robot is spawned at different orientations and positions around the persons every 40 seconds, which we consider the duration of one episode. Although there are two persons in the scene, only one of the two is considered the interaction target. Hence in our image input representation only one circle is given a value of 2 and the other a value of 1. The reward function in this scenario consists of two parts. The first which we name $r_i$ is a based on the orientation of the robot with respect to the interaction target. 
 
 \begin{equation}
 	r_i = \frac{\pi}{3} -|\phi_{rel}| 
 \end{equation}
 
-The second part is a reward based on the distance of the robot to each person (Figure \ref{fig:rd}). We penalise the robot being either too close or too far away from the people in the room. To do so, for each person we consider the d istance based reward for person $p$, $r_{d_p}$ to be the addition of two sigmoids.
+	\begin{figure}
+	\centering
+	%\vspace{-3.3mm}
+	    \includegraphics[width=0.4\textwidth]{figures/people_room.png}
+	%\vspace{-4mm}
+	  \caption[Cost function integration social setting.]{Social setting in our experiments.}
+	  \label{fig:pg_setting}
+	\end{figure}
+	
 
-\begin{equation}
-	r_{d_p} = \frac{-2}{1+\exp(22-10x)}+ \frac{-2}{1+\exp(-7+10x)} 
-\end{equation}
-where x is the eucledian distance from the robot.
+This reward function is a continuous version of the bearing based reward function presented in D5.3 and was learned from human feedback. The second part is a reward based on the distance of the robot to each person ($r_{d_p}$) (Figure \ref{fig:rd}) which was also learned from human feedback in Deliverable 5.3. This reward function penalises the robot being either too close or too far away from the people in the room. In this way we ensure the robot attempts to obtain a social distance with both people present in the scene. 
 
 	\begin{figure}
 	\centering
 	%\vspace{-3.3mm}
-	    \includegraphics[width=0.5\textwidth]{figures/rd.png}
+	    \includegraphics[width=0.4\textwidth]{figures/rd.png}
 	%\vspace{-4mm}
-	  \caption[Distance based reward function]{Reward function based on the distance of the robot from the simulated people in the scene.}
+	  \caption[Distance based reward function]{Distance based reward function}
 	  \label{fig:rd}
 	\end{figure}
 	
@@ -987,16 +825,14 @@ The total reward is given as the addition of $r_i$ and the two $r_{d_p}$ reward 
 	\end{figure}
 
 \subsubsection{Exploration}
-In order to promote our pre-trained SL policy to explore different actions exploration policies can be used. One very basic form of exploration policy is $\epsilon-$greedy. Under this exploration policy the agent takes the action prescribed by the policy with probability $1-\epsilon$ and with probability $\epsilon$ takes a unoformly random action from $A$. This is fine for most applications, however for control applications like ours the control rate of the agent is quite high (10Hz) and actions that are similar in magnitute have similar dynamics assosciated with them. This means that it makes more sense for the agent to explore actions around the previous action rather than picking an action at random. In recent work researchers use different forms of correlated processes in order to generate useful exploratory trajectories, for example in \cite{lillicrap2015continuous} the authors use an  Ornstein-Uhlenbeck process \cite{uhlenbeck1930theory}. In our case we do not have continuous actions and thus take a slightly different approach to produce correlated action samples. 
+In order to promote our pre-trained SL policy to explore different actions exploration policies can be used. One very basic form of exploration policy is $\epsilon-$greedy. Under this exploration policy the agent takes the action prescribed by the policy with probability $1-\epsilon$ and with probability $\epsilon$ takes a uniformly random action from $A$. This is fine for most applications, however for control applications like ours the control rate of the agent is quite high (10Hz) and actions that are similar in magnitute have similar dynamics assosciated with them. This means that it makes more sense for the agent to explore actions around the previous action rather than picking an action at random. In recent work researchers use different forms of correlated processes in order to generate useful exploratory trajectories, for example in \cite{lillicrap2015continuous} the authors use an  Ornstein-Uhlenbeck process \cite{uhlenbeck1930theory}. In our case we do not have continuous actions and thus take a slightly different approach to produce correlated action samples. 
 
-Supose we have 7 available actions to choose from. Instead of choosin an action with uniform probability we place a Gaussian function with a mean on the previous action \emph{index} $a^{idx}_{t-1}$ and a scale c. We can then calculate the probability of action index at time $t$, $a^{idx}_{t-1}$ according to,   
+Suppose we have 7 available actions to choose from. Instead of choosing an action with uniform probability we place a Gaussian function with a mean on the previous action \emph{index} $a^{idx}_{t-1}$ and a scale c. We can then calculate the probability of action index at time $t$, $a^{idx}_{t-1}$ according to,   
 
 
 \begin{equation}
-	p(a^{idx}_t) =\frac{\exp(-\frac{(a^{idx}_t-a^{idx}_{t-1})^2}{2c^2})}{\sum_i^{|\mathcal{A}|} \exp(-\frac{(a^{idx}_i-a^{idx}_{t-1})^2}{2c^2}) }.
+	p(a^{idx}_t) =\frac{\exp(-\frac{(a^{idx}_t-a^{idx}_{t-1})^2}{2c^2})}{\sum_i^{|\mathcal{A}|} \exp(-\frac{(a^{idx}_i-a^{idx}_{t-1})^2}{2c^2})}.
 \end{equation}
-
-
 
 This means that we give a greater weight for actions closer in index to our previous action and assuming that actions closer in index are more similar as in our case we can achieve a correlated noise effect. A sample of such an action process is shown in Figure for various values of the scale $c$. We can see that a when $c=1.1$ the action sequence is much more reasonable for any physical system than the case where $c=20$, which is essentially like drawing samples from a uniform distribution. 
 
@@ -1005,7 +841,6 @@ This means that we give a greater weight for actions closer in index to our prev
 	\centering
 %	\hspace{-5cm}
       \begin{subfigure}[b]{0.45\columnwidth}
-
     \includegraphics[clip=true,width=1.\textwidth]{figures/action_11.png}
     \caption{c = 1.1}
     \label{fig:c_11}
@@ -1023,14 +858,10 @@ This means that we give a greater weight for actions closer in index to our prev
   \label{fig:exploration}
 \end{figure}
 
-\subsection{Results}
-In this section our aim was to show that by using policy gradient RL methods we can learn a policy that can perform well both in terms of the initial SL policy and the specified reward function. We further claimed that if the reward function was reasonably close to the human prefereces in the demonstrations it will also allow the RL algorithm to learn better. In this section we document out results with respect to these aims. Our method named RL+SL is compated to cases where only one learning paradigm is used. The method named $RL_{only}$ uses reinforcement learning on the reward function above, while the method $SL_{only}$ only learns a policy using the demonstrations as in the previous section. We perform a comparison of these 3 methods both in terms of the cost function described above and in terms of the human demonstrations.
+\subsection{Results}\label{sec:pg_results}
+In this section our aim is to show that by using policy gradient RL methods we can learn a policy that can perform well both in terms of the initial SL policy and the specified reward function. We further claimed that if the reward function was reasonably close to the human prefereces in the demonstrations it will also allow the RL algorithm to learn better. In this section we document out results with respect to these aims. Our method, named RL+SL is compared to cases where only one learning paradigm is used. The method named $RL_{only}$ uses reinforcement learning on the reward function described in the previous section, while the method $SL_{only}$ only learns a policy using the demonstrations as in Section \ref{sec:sl_policy}.
 
-\subsection{Comparison with RL}
-In this first comparison we use our SL policy as a starting point and then use the cost function described above to learn a new policy using RL. We compare this to learning using RL from scratch, i.e starting with a random policy and with usign the SL policy without any learning. Figure ?? plots the average reward over 10000 timesteps for each method. Figure ?? shows the histograms of rewards for batches of 10000 timesteps for each algorithm. We can see that there is a clear advantage to using SL+RL than any of the two methods on their own. This advantage comes both in terms of speed of learning as well as the convereged policy.
-
-\subsection{Comparison with SL}
-After using RL on the three policies we can go back and see how they perform on the supervised data. This can be done by simply measuring the total cross entropy loss for the whole demonstration dataset collected, without performing any learning. The results are summarised in Table ??, we can clearly see that...  
+Using our SL policy as a starting point and then use the cost function described above to learn a new policy using RL. We compare this to learning using RL from scratch, i.e starting with a random policy and with using the SL policy without any learning. Figure ?? plots the average reward over the previous 10000 learning timesteps for each method. We can see that when combining RL with SL we can learn a policy that more effectively maximises the average reward over time and does so more quickly than learning using RL form scratch. Furthermore we can see that although the human demonstrations are helpful, they perform quite badlyy with respect to the prescribed reward function. Another perspective on the learning is shown in Figure [HISTOGRAMS]. Here the y-axis represents sequentlial 10000 timestep long intervals during learning. The x-axis shows a histogram of rewards for each interval, for each learning method. We can see that SL+RL quickly starts to accumulate the rewards to the right side of the histogram (where rewards are higher). 
 
 \section{Integrating different cost functions using a multi-objective approach}\label{sec:mopomdp}
 For the TERESA project, we have different sources of reward/cost (Section \ref{sec:sl+rl}). When there are multiple sources of possibly conflicting feedback with respect to the socially optimal behaviour of the telepresence robot, e.g.,  corresponding to the user experience of the pilot (i.e., the person who steers the robot from a distance) and to the user experience of the target(s) (the person(s) with whom the robot is collocated and interacts directly), it is unclear what the best way is to integrate these. In the previous section, we have integrated different sources of cost manually, a priori. However, a theoretically more grounded way would be to see the different sources of cost as different objectives, and compute a set of policies for the robot that make different trade-offs between these objectives. This leads to so-called multi-objective decision making. 
